@@ -9,9 +9,9 @@ function CounterPage() {
     const videoHeight = "720px";
     const videoWidth = "1280px";
 
-    let runningMode = "VIDEO";
     let poseLandmarker = undefined;
 
+    // Create tge PoseLandmarker
     const createPoseLandmarker = async () => {
         const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm");
         poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
@@ -19,7 +19,7 @@ function CounterPage() {
                 modelAssetPath: `https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task`,
                 delegate: "GPU"
             },
-            runningMode: runningMode,
+            runningMode: "VIDEO",
             numPoses: 2
         });
     };
@@ -27,8 +27,6 @@ function CounterPage() {
 
     // Check if webcam access is supported.
     const hasGetUserMedia = () => !!navigator.mediaDevices?.getUserMedia;
-
-    // If webcam supported, add event listener to button for when user wants to activate it.
     if (!hasGetUserMedia()) {
         console.warn("getUserMedia() is not supported by your browser");
     }
@@ -50,13 +48,8 @@ function CounterPage() {
             enableWebcamButton.current.innerText = "DISABLE PREDICTIONS";
         }
 
-        // getUsermedia parameters.
-        const constraints = {
-            video: true
-        };
-
         // Activate the webcam stream.
-        navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+        navigator.mediaDevices.getUserMedia({video: true}).then((stream) => {
             videoElement.current.srcObject = stream;
             videoElement.current.addEventListener("loadeddata", predictWebcam);
         }).catch((error) => {
@@ -68,9 +61,10 @@ function CounterPage() {
     let canvasCtx = useRef(null)
     let drawingUtils = useRef(null)
 
-
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         canvasCtx = canvasElement.current.getContext("2d");
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         drawingUtils = new DrawingUtils(canvasCtx);
     }, [canvasElement]);
 
@@ -79,11 +73,7 @@ function CounterPage() {
         videoElement.current.style.height = videoHeight;
         canvasElement.current.style.width = videoWidth;
         videoElement.current.style.width = videoWidth;
-        // Now let's start detecting the stream.
-        if (runningMode === "IMAGE") {
-            runningMode = "VIDEO";
-            await poseLandmarker.setOptions({runningMode: "VIDEO"});
-        }
+
         let startTimeMs = performance.now();
         if (lastVideoTime !== videoElement.current.currentTime) {
             lastVideoTime = videoElement.current.currentTime;
@@ -108,7 +98,7 @@ function CounterPage() {
 
     return (
         <>
-            <h1>Counter!!</h1>
+            <h1>Flex Counter!!</h1>
             <div>
                 <video autoPlay playsInline id="webcam" className="h-[720px] w-[1280px] absolute top-10" ref={videoElement}></video>
                 <canvas id="output_canvas" className="absolute top-10" width="1280" height="720" ref={canvasElement}></canvas>
