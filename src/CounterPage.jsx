@@ -1,11 +1,13 @@
-import {useEffect, useRef} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {PoseLandmarker, FilesetResolver, DrawingUtils,} from '@mediapipe/tasks-vision'
+import Goal from "./Goal.jsx";
 
 function CounterPage() {
     const videoElement = useRef(null)
     const canvasElement = useRef(null)
+    const [goal, setGoal] = useState(10);
     const enableWebcamButton = useRef(null)
-    let webcamRunning = false;
+    let predictionsRunning = false;
     const videoHeight = "720px";
     const videoWidth = "1280px";
 
@@ -40,11 +42,11 @@ function CounterPage() {
             return;
         }
 
-        if (webcamRunning === true) {
-            webcamRunning = false;
+        if (predictionsRunning === true) {
+            predictionsRunning = false;
             enableWebcamButton.current.innerText = "ENABLE PREDICTIONS";
         } else {
-            webcamRunning = true;
+            predictionsRunning = true;
             enableWebcamButton.current.innerText = "DISABLE PREDICTIONS";
         }
 
@@ -91,20 +93,21 @@ function CounterPage() {
         }
 
         // Call this function again to keep predicting when the browser is ready.
-        if (webcamRunning === true) {
+        if (predictionsRunning === true) {
             window.requestAnimationFrame(predictWebcam);
         }
     }
 
     return (
-        <>
-            <h1>Flex Counter!!</h1>
-            <div>
-                <video autoPlay playsInline id="webcam" className="h-[720px] w-[1280px] absolute top-10" ref={videoElement}></video>
-                <canvas id="output_canvas" className="absolute top-10" width="1280" height="720" ref={canvasElement}></canvas>
+        <div className="min-h-screen bg-gradient-to-br from-[#ff8c00] to-[#ffe312] px-[5vw] pt-[3vh] flex flex-col items-center gap-4">
+            <h1 className="text-6xl font-bold">FLEX COUNTER</h1>
+            <Goal goal={goal} setGoal={setGoal}/>
+            <button className="bg-lime-400 rounded p-2 w-[40vw]" ref={enableWebcamButton} onClick={enableCam}>Enable webcam</button>
+            <div className="bg-black/25 h-[720px] w-[1280px]">
+                <video autoPlay playsInline id="webcam" className="absolute h-[720px] w-[1280px]" ref={videoElement}></video>
+                <canvas id="output_canvas" className="absolute" width="1280" height="720" ref={canvasElement}></canvas>
             </div>
-            <button ref={enableWebcamButton} onClick={enableCam}>Enable webcam</button>
-        </>
+        </div>
     )
 
 }
