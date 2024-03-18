@@ -5,12 +5,11 @@ import Goal from "./Goal.jsx";
 function CounterPage() {
     const videoElement = useRef(null)
     const canvasElement = useRef(null)
-    const [goal, setGoal] = useState(10);
+    const [goal, setGoal] = useState(69);
     const enableWebcamButton = useRef(null)
     let predictionsRunning = false;
     const videoHeight = "720px";
     const videoWidth = "1280px";
-
     let poseLandmarker = undefined;
 
     // Create tge PoseLandmarker
