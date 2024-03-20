@@ -15,12 +15,14 @@ function Goal({goal, setGoal}) {
 
     function increaseGoal() {
         setGoal(goal += 2)
+        console.log(goal)
         goalInput.current.value = goal
         localStorage.setItem("goal", goal);
     }
 
     function decreaseGoal() {
         setGoal(goal -= 2)
+        console.log(goal)
         goalInput.current.value = goal
         localStorage.setItem("goal", goal);
     }

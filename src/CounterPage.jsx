@@ -94,13 +94,39 @@ function CounterPage() {
         // Call this function again to keep predicting when the browser is ready.
         if (predictionsRunning === true) {
             window.requestAnimationFrame(predictWebcam);
+            if (poseLandmarker.landmarks[0]) {
+                let lShoulder = poseLandmarker.landmarks[0][12].y
+                let lElbow = poseLandmarker.landmarks[0][14].y
+                let lHand = poseLandmarker.landmarks[0][20].y
+                let down = 1
+                let score = 0
+
+                if (lHand < lShoulder) {
+                    console.log("up")
+                    if (down === 1) {
+                        score += 1
+                        console.log(`Score: ${score}`)
+                        down = 0
+                    }
+                }
+
+                if (lHand < lElbow && lHand > lShoulder) {
+                    console.log("mid")
+                    console.log(`Down: ${down}`)
+                }
+
+                if (lHand > lElbow) {
+                    console.log("down")
+                    down = 1
+                }
+            }
         }
     }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#ff8c00] to-[#ffe312] px-[5vw] pt-[3vh] flex flex-col items-center gap-4">
             <h1 className="text-6xl font-bold">FLEX COUNTER</h1>
-            <Goal goal={goal} setGoal={setGoal}/>
+            {/*<Goal goal={goal} setGoal={setGoal}/>*/}
             <button className="bg-lime-400 rounded p-2 w-[40vw]" ref={enableWebcamButton} onClick={enableCam}>Enable webcam</button>
             <div className="bg-black/25 h-[720px] w-[1280px]">
                 <video autoPlay playsInline id="webcam" className="absolute h-[720px] w-[1280px]" ref={videoElement}></video>
