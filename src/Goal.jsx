@@ -9,7 +9,6 @@ function Goal({goal, setGoal}) {
         const localGoal = parseInt(localStorage.getItem("goal") || 40);
         console.log(localGoal)
         setGoal(localGoal)
-        console.log(goal)
         goalInput.current.value = goal
     }, []);
 

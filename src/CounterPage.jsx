@@ -12,6 +12,11 @@ function CounterPage() {
     const videoWidth = "1280px";
     let poseLandmarker = undefined;
 
+    let lDown = false
+    let rDown = false
+    const [lScore, setLScore] = useState(0)
+    const [rScore, setRScore] = useState(0)
+
     // Create tge PoseLandmarker
     const createPoseLandmarker = async () => {
         const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm");
@@ -61,13 +66,15 @@ function CounterPage() {
     let lastVideoTime = -1;
     let canvasCtx = useRef(null)
     let drawingUtils = useRef(null)
+    console.log(canvasCtx)
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
         canvasCtx = canvasElement.current.getContext("2d");
         // eslint-disable-next-line react-hooks/exhaustive-deps
         drawingUtils = new DrawingUtils(canvasCtx);
-    }, [canvasElement]);
+        console.log(canvasCtx)
+    }, [canvasElement.current]);
 
     async function predictWebcam() {
         canvasElement.current.style.height = videoHeight;
@@ -79,6 +86,7 @@ function CounterPage() {
         if (lastVideoTime !== videoElement.current.currentTime) {
             lastVideoTime = videoElement.current.currentTime;
             poseLandmarker.detectForVideo(videoElement.current, startTimeMs, (result) => {
+                console.log(canvasCtx)
                 canvasCtx.save();
                 canvasCtx.clearRect(0, 0, canvasElement.current.width, canvasElement.current.height);
                 for (const landmark of result.landmarks) {
@@ -94,30 +102,42 @@ function CounterPage() {
         // Call this function again to keep predicting when the browser is ready.
         if (predictionsRunning === true) {
             window.requestAnimationFrame(predictWebcam);
-            if (poseLandmarker.landmarks[0]) {
-                let lShoulder = poseLandmarker.landmarks[0][12].y
-                let lElbow = poseLandmarker.landmarks[0][14].y
-                let lHand = poseLandmarker.landmarks[0][20].y
-                let down = 1
-                let score = 0
 
-                if (lHand < lShoulder) {
-                    console.log("up")
-                    if (down === 1) {
-                        score += 1
-                        console.log(`Score: ${score}`)
-                        down = 0
+            if (poseLandmarker.landmarks[0] && poseLandmarker.landmarks[0][12].visibility > 0.9 && poseLandmarker.landmarks[0][14].visibility > 0.9 && poseLandmarker.landmarks[0][20].visibility > 0.9) {
+                let lShoulderY = poseLandmarker.landmarks[0][12].y
+                let lElbowY = poseLandmarker.landmarks[0][14].y
+                let lHandY = poseLandmarker.landmarks[0][20].y
+
+                if (lHandY < lShoulderY) {
+                    // console.log("Left up")
+                    if (lDown) {
+                        setLScore((lScore) => lScore + 1)
+                        lDown = false
                     }
                 }
 
-                if (lHand < lElbow && lHand > lShoulder) {
-                    console.log("mid")
-                    console.log(`Down: ${down}`)
+                if (lHandY > lElbowY) {
+                    // console.log("Left down")
+                    lDown = true
+                }
+            }
+
+            if (poseLandmarker.landmarks[0] && poseLandmarker.landmarks[0][11].visibility > 0.9 && poseLandmarker.landmarks[0][13].visibility > 0.9 && poseLandmarker.landmarks[0][19].visibility > 0.9) {
+                let rShoulderY = poseLandmarker.landmarks[0][11].y
+                let rElbowY = poseLandmarker.landmarks[0][13].y
+                let rHandY = poseLandmarker.landmarks[0][19].y
+
+                if (rHandY < rShoulderY) {
+                    // console.log("Right up")
+                    if (rDown) {
+                        setRScore((rScore) => rScore + 1)
+                        rDown = false
+                    }
                 }
 
-                if (lHand > lElbow) {
-                    console.log("down")
-                    down = 1
+                if (rHandY > rElbowY) {
+                    // console.log("Right down")
+                    rDown = true
                 }
             }
         }
@@ -126,7 +146,9 @@ function CounterPage() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#ff8c00] to-[#ffe312] px-[5vw] pt-[3vh] flex flex-col items-center gap-4">
             <h1 className="text-6xl font-bold">FLEX COUNTER</h1>
-            {/*<Goal goal={goal} setGoal={setGoal}/>*/}
+            <Goal goal={goal} setGoal={setGoal}/>
+            <p>{lScore}</p>
+            <p>{rScore}</p>
             <button className="bg-lime-400 rounded p-2 w-[40vw]" ref={enableWebcamButton} onClick={enableCam}>Enable webcam</button>
             <div className="bg-black/25 h-[720px] w-[1280px]">
                 <video autoPlay playsInline id="webcam" className="absolute h-[720px] w-[1280px]" ref={videoElement}></video>
