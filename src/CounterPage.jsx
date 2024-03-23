@@ -11,14 +11,29 @@ function CounterPage() {
     let poseLandmarker = undefined;
     let predictionsRunning = false;
     let lastVideoTime = -1;
-    const videoHeight = "720px";
-    const videoWidth = "1280px";
+    const videoHeight = "480px";
+    const videoWidth = "854px";
+    // const videoHeight = "720px";
+    // const videoWidth = "1280px";
     let disableButton = false
 
     let lDown = false
     let rDown = false
     const [lScore, setLScore] = useState(0)
     const [rScore, setRScore] = useState(0)
+
+    const [lTotal, setLTotal] = useState(0)
+    const [rTotal, setRTotal] = useState(0)
+    const [lRecord, setLRecord] = useState(0)
+    const [rRecord, setRRecord] = useState(0)
+    const [activeModel, setActiveModel] = useState("Logic")
+
+    useEffect(() => {
+        setLTotal(parseInt(localStorage.getItem("lTotal") || 0))
+        setRTotal(parseInt(localStorage.getItem("rTotal") || 0))
+        setLRecord(parseInt(localStorage.getItem("lRecord") || 0))
+        setRRecord(parseInt(localStorage.getItem("rRecord") || 0))
+    }, []);
 
     // Set canvasCtx & drawingUtils when the canvasElement has loaded
     useEffect(() => {
@@ -131,7 +146,6 @@ function CounterPage() {
                 console.log(`I think this is ${prediction}`)
 
                 if (lHandY < lShoulderY) {
-                    // console.log("Left up")
                     if (lDown) {
                         setLScore((lScore) => lScore + 1)
                         lDown = false
@@ -139,7 +153,6 @@ function CounterPage() {
                 }
 
                 if (lHandY > lElbowY) {
-                    // console.log("Left down")
                     lDown = true
                 }
             }
@@ -150,7 +163,6 @@ function CounterPage() {
                 let rHandY = poseLandmarker.landmarks[0][19].y
 
                 if (rHandY < rShoulderY) {
-                    // console.log("Right up")
                     if (rDown) {
                         setRScore((rScore) => rScore + 1)
                         rDown = false
@@ -158,7 +170,6 @@ function CounterPage() {
                 }
 
                 if (rHandY > rElbowY) {
-                    // console.log("Right down")
                     rDown = true
                 }
             }
@@ -166,6 +177,39 @@ function CounterPage() {
     }
 
     startApp()
+
+    function changeModel() {
+        if (activeModel === "Logic") {
+            setActiveModel("KNN")
+        } else {
+            setActiveModel("Logic")
+        }
+        console.log(activeModel)
+    }
+
+    function saveScore() {
+        const newLTotal = lTotal + lScore
+        const newRTotal = rTotal + rScore
+
+        setLTotal(newLTotal)
+        setRTotal(newRTotal)
+
+        localStorage.setItem("lTotal", newLTotal)
+        localStorage.setItem("rTotal", newRTotal)
+
+        if (lScore > lRecord) {
+            localStorage.setItem("lRecord", lScore)
+            setLRecord(lScore)
+        }
+
+        if (rScore > rRecord) {
+            localStorage.setItem("rRecord", rScore)
+            setRRecord(rScore)
+        }
+
+        setLScore(0)
+        setRScore(0)
+    }
 
     const delay = async (ms) => {
         return new Promise((resolve) =>
@@ -189,14 +233,41 @@ function CounterPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#ff8c00] to-[#ffe312] px-[5vw] pt-[3vh] flex flex-col items-center gap-4">
-            <h1 className="text-6xl font-bold">FLEX COUNTER</h1>
-            <p>Left arm: {lScore} | Right arm: {rScore}</p>
-            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 w-[40vw]" onClick={getDataPoints}>Data</button>
-            <button className="bg-lime-400 hover:bg-lime-500 rounded p-2 w-[40vw]" disabled={disableButton} ref={enableWebcamButton} onClick={enableCam}>Loading...</button>
-            <div className="bg-black/25 h-[720px] w-[1280px]">
-                <video autoPlay playsInline id="webcam" className="absolute h-[720px] w-[1280px]" ref={videoElement}></video>
-                <canvas id="output_canvas" className="absolute" width={videoWidth} height={videoHeight} ref={canvasElement}></canvas>
+        <div className="min-h-screen bg-gradient-to-br from-[#ff8c00] to-[#ffe312] flex flex-col items-center justify-center gap-4 text-white">
+            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-2 left-2" onClick={getDataPoints}>Train Data</button>
+
+            <h1 className="text-7xl font-bold">FLEX COUNTER</h1>
+
+            <div className="flex flex-row gap-4 w-[854px] h-[25vh] justify-between">
+                <div className="w-[30%] bg-black/25 rounded-2xl p-4 text-center">
+                    <p className="text-5xl">Left</p>
+                    <p className="text-9xl">{lScore}</p>
+                </div>
+                <div className="flex flex-col justify-between w-[40%] items-center">
+                    <div className="w-full h-full bg-black/25 rounded-2xl p-4 mb-2 text-center">
+                        <p className="text-3xl">Total</p>
+                        <p className="text-4xl">{lTotal} + {rTotal}</p>
+                    </div>
+                    <div className="w-full h-full bg-black/25 rounded-2xl p-4 text-center">
+                        <p className="text-3xl">Record</p>
+                        <p className="text-4xl">{lRecord} + {rRecord}</p>
+                    </div>
+                </div>
+                <div className="w-[30%] bg-black/25 rounded-2xl p-4 text-center">
+                    <p className="text-5xl">Right</p>
+                    <p className="text-9xl">{rScore}</p>
+                </div>
+            </div>
+
+            <div className="w-[854px] flex gap-4">
+                <button className="bg-red-500 hover:bg-red-600 rounded-lg p-2 w-[30%] transition" onClick={changeModel}>Tracking Model: {activeModel}</button>
+                <button className="bg-lime-400 hover:bg-lime-500 rounded-lg p-2 w-[40%] transition" disabled={disableButton} ref={enableWebcamButton} onClick={enableCam}>Loading...</button>
+                <button className="bg-blue-400 hover:bg-blue-500 rounded-lg p-2 w-[30%] transition" onClick={saveScore}>Save Score</button>
+            </div>
+
+            <div className="bg-black/25 h-[480px] w-[854px] rounded-2xl">
+                <video autoPlay playsInline id="webcam" className="absolute h-[480px] w-[854px] rounded-2xl" ref={videoElement}></video>
+                <canvas id="output_canvas" className="absolute rounded-2xl" width={videoWidth} height={videoHeight} ref={canvasElement}></canvas>
             </div>
         </div>
     )
