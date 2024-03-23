@@ -87,6 +87,21 @@ function CounterPage() {
         });
     }
 
+    const k = 3
+    const machine = new kNear(k);
+
+    machine.learn([0.29699888825416565, 0.5170987844467163, 0.19376200437545776], 'up')
+    machine.learn([0.25645995140075684, 0.5157449245452881, 0.18175971508026123], 'up')
+    machine.learn([0.29640400409698486, 0.5498039722442627, 0.23758822679519653], 'up')
+    machine.learn([0.29363715648651123, 0.5336388945579529, 0.28399333357810974], 'up')
+    machine.learn([0.31886687874794006, 0.46447107195854187, 0.16273164749145508], 'up')
+
+    machine.learn([0.30467694997787476, 0.5444952845573425, 0.7781786918640137], 'down')
+    machine.learn([0.31995970010757446, 0.5650004744529724, 0.7957270741462708], 'down')
+    machine.learn([0.29677191376686096, 0.5260168313980103, 0.6818185448646545], 'down')
+    machine.learn([0.33023908734321594, 0.5576013922691345, 0.68390953540802], 'down')
+    machine.learn([0.2913947105407715, 0.551878809928894, 0.6582819223403931], 'down')
+
     async function predictWebcam() {
         let startTimeMs = performance.now();
         if (lastVideoTime !== videoElement.current.currentTime) {
@@ -111,6 +126,9 @@ function CounterPage() {
                 let lShoulderY = poseLandmarker.landmarks[0][12].y
                 let lElbowY = poseLandmarker.landmarks[0][14].y
                 let lHandY = poseLandmarker.landmarks[0][20].y
+
+                let prediction = machine.classify([lShoulderY, lElbowY, lHandY])
+                console.log(`I think this is ${prediction}`)
 
                 if (lHandY < lShoulderY) {
                     // console.log("Left up")
@@ -149,31 +167,33 @@ function CounterPage() {
 
     startApp()
 
-    const k = 3
-    const machine = new kNear(k);
+    const delay = async (ms) => {
+        return new Promise((resolve) =>
+            setTimeout(resolve, ms));
+    };
 
-    // machine.learn([6, 5, 9, 4], 'cat')
-    // machine.learn([12, 20, 19, 3], 'dog')
-    // machine.learn([6, 5, 9, 4], 'cat')
-    // machine.learn([12, 20, 19, 3], 'dog')
-    // machine.learn([6, 5, 9, 4], 'cat')
-    // machine.learn([12, 20, 19, 3], 'dog')
+    async function getDataPoints() {
+        for (let i = 0; i < 5; i++) {
+            await delay(4000);
 
-    machine.learn([18, 9.2, 8.1, 2], 'cat')
-    machine.learn([20.1, 17, 15.5, 5], 'dog')
-    machine.learn([17, 9.1, 9, 1.95], 'cat')
-    machine.learn([23.5, 20, 20, 6.2], 'dog')
-    machine.learn([16, 9, 10, 2.1], 'cat')
-    machine.learn([21, 16.7, 16, 3.3], 'dog')
+            if (poseLandmarker.landmarks[0]) {
+                let lShoulder = poseLandmarker.landmarks[0][12]
+                let lElbow = poseLandmarker.landmarks[0][14]
+                let lHand = poseLandmarker.landmarks[0][20]
 
-    let prediction = machine.classify([21, 16, 16, 4])
-    console.log(`I think this is a ${prediction}`)
+                if (lShoulder.visibility > 0.9 && lElbow.visibility > 0.9 && lHand.visibility > 0.9) {
+                    console.log({pose: [lShoulder.y, lElbow.y, lHand.y], label: "down"})
+                }
+            }
+        }
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#ff8c00] to-[#ffe312] px-[5vw] pt-[3vh] flex flex-col items-center gap-4">
             <h1 className="text-6xl font-bold">FLEX COUNTER</h1>
             <p>Left arm: {lScore} | Right arm: {rScore}</p>
-            <button className="bg-lime-400 rounded p-2 w-[40vw]" disabled={disableButton} ref={enableWebcamButton} onClick={enableCam}>Loading...</button>
+            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 w-[40vw]" onClick={getDataPoints}>Data</button>
+            <button className="bg-lime-400 hover:bg-lime-500 rounded p-2 w-[40vw]" disabled={disableButton} ref={enableWebcamButton} onClick={enableCam}>Loading...</button>
             <div className="bg-black/25 h-[720px] w-[1280px]">
                 <video autoPlay playsInline id="webcam" className="absolute h-[720px] w-[1280px]" ref={videoElement}></video>
                 <canvas id="output_canvas" className="absolute" width={videoWidth} height={videoHeight} ref={canvasElement}></canvas>
