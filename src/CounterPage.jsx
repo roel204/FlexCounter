@@ -15,7 +15,7 @@ function CounterPage() {
     const videoWidth = "854px";
     // const videoHeight = "720px";
     // const videoWidth = "1280px";
-    let disableButton = false
+    const [disableButton, setDisableButton] = useState(true)
 
     let lDown = false
     let rDown = false
@@ -35,13 +35,10 @@ function CounterPage() {
         setRRecord(parseInt(localStorage.getItem("rRecord") || 0))
     }, []);
 
-    // Set canvasCtx & drawingUtils when the canvasElement has loaded
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        canvasCtx = canvasElement.current.getContext("2d");
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        drawingUtils = new DrawingUtils(canvasCtx);
-    }, [canvasElement.current]);
+    const delay = async (ms) => {
+        return new Promise((resolve) =>
+            setTimeout(resolve, ms));
+    };
 
     // Setup user camera
     function startApp() {
@@ -67,8 +64,9 @@ function CounterPage() {
             runningMode: "VIDEO",
             numPoses: 2
         });
+        await delay(500)
+        setDisableButton(false)
         enableWebcamButton.current.innerText = "Enable Webcam"
-        enableWebcamButton.current.enabled
     };
 
     // Enable the live webcam view and start detection
@@ -82,10 +80,10 @@ function CounterPage() {
 
         if (predictionsRunning === true) {
             predictionsRunning = false;
-            enableWebcamButton.current.innerText = "ENABLE PREDICTIONS";
+            enableWebcamButton.current.innerText = "Enable Predictions";
         } else {
             predictionsRunning = true;
-            enableWebcamButton.current.innerText = "DISABLE PREDICTIONS";
+            enableWebcamButton.current.innerText = "Disable Predictions";
         }
 
         // Activate the webcam stream
@@ -116,19 +114,23 @@ function CounterPage() {
     machine.learn([0.29677191376686096, 0.5260168313980103, 0.6818185448646545], 'down')
     machine.learn([0.33023908734321594, 0.5576013922691345, 0.68390953540802], 'down')
     machine.learn([0.2913947105407715, 0.551878809928894, 0.6582819223403931], 'down')
+    console.log("KNN Trained")
+
 
     async function predictWebcam() {
         let startTimeMs = performance.now();
+        canvasCtx = canvasElement.current.getContext("2d");
+        drawingUtils = new DrawingUtils(canvasCtx);
+
         if (lastVideoTime !== videoElement.current.currentTime) {
             lastVideoTime = videoElement.current.currentTime;
             poseLandmarker.detectForVideo(videoElement.current, startTimeMs, (result) => {
-                canvasCtx.save();
+
                 canvasCtx.clearRect(0, 0, canvasElement.current.width, canvasElement.current.height);
                 for (const landmark of result.landmarks) {
                     drawingUtils.drawLandmarks(landmark, {radius: (data) => DrawingUtils.lerp(data.from.z, -0.15, 0.1, 5, 1)});
                     drawingUtils.drawConnectors(landmark, PoseLandmarker.POSE_CONNECTIONS);
                 }
-                canvasCtx.restore();
             });
         }
 
@@ -142,18 +144,37 @@ function CounterPage() {
                 let lElbowY = poseLandmarker.landmarks[0][14].y
                 let lHandY = poseLandmarker.landmarks[0][20].y
 
-                let prediction = machine.classify([lShoulderY, lElbowY, lHandY])
-                console.log(`I think this is ${prediction}`)
+                if (activeModel === "KNN") {
+                    console.log("KNN")
 
-                if (lHandY < lShoulderY) {
-                    if (lDown) {
-                        setLScore((lScore) => lScore + 1)
-                        lDown = false
+                    let prediction = machine.classify([lShoulderY, lElbowY, lHandY])
+                    console.log(`I think this is ${prediction}`)
+
+                    if (prediction === "up") {
+                        if (lDown) {
+                            setLScore((lScore) => lScore + 1)
+                            lDown = false
+                        }
                     }
-                }
 
-                if (lHandY > lElbowY) {
-                    lDown = true
+                    if (prediction === "down") {
+                        lDown = true
+                    }
+
+                } else {
+                    console.log("Logic")
+
+                    if (lHandY < lShoulderY) {
+                        if (lDown) {
+                            setLScore((lScore) => lScore + 1)
+                            lDown = false
+                        }
+                    }
+
+                    if (lHandY > lElbowY) {
+                        lDown = true
+                    }
+
                 }
             }
 
@@ -179,12 +200,7 @@ function CounterPage() {
     startApp()
 
     function changeModel() {
-        if (activeModel === "Logic") {
-            setActiveModel("KNN")
-        } else {
-            setActiveModel("Logic")
-        }
-        console.log(activeModel)
+        setActiveModel((prevState) => (prevState === "Logic" ? "KNN" : "Logic"));
     }
 
     function saveScore() {
@@ -211,11 +227,6 @@ function CounterPage() {
         setRScore(0)
     }
 
-    const delay = async (ms) => {
-        return new Promise((resolve) =>
-            setTimeout(resolve, ms));
-    };
-
     async function getDataPoints() {
         for (let i = 0; i < 5; i++) {
             await delay(4000);
@@ -226,7 +237,7 @@ function CounterPage() {
                 let lHand = poseLandmarker.landmarks[0][20]
 
                 if (lShoulder.visibility > 0.9 && lElbow.visibility > 0.9 && lHand.visibility > 0.9) {
-                    console.log({pose: [lShoulder.y, lElbow.y, lHand.y], label: "down"})
+                    console.log({pose: [lShoulder.y, lElbow.y, lHand.y], label: "up/down"})
                 }
             }
         }
@@ -260,9 +271,9 @@ function CounterPage() {
             </div>
 
             <div className="w-[854px] flex gap-4">
-                <button className="bg-red-500 hover:bg-red-600 rounded-lg p-2 w-[30%] transition" onClick={changeModel}>Tracking Model: {activeModel}</button>
-                <button className="bg-lime-400 hover:bg-lime-500 rounded-lg p-2 w-[40%] transition" disabled={disableButton} ref={enableWebcamButton} onClick={enableCam}>Loading...</button>
-                <button className="bg-blue-400 hover:bg-blue-500 rounded-lg p-2 w-[30%] transition" onClick={saveScore}>Save Score</button>
+                <button className="bg-red-500 hover:bg-red-600 rounded-lg p-2 w-[30%] transition" disabled={disableButton} onClick={changeModel}>Tracking Model: {activeModel}</button>
+                <button className="bg-lime-500 hover:bg-lime-600 rounded-lg p-2 w-[40%] transition" disabled={disableButton} ref={enableWebcamButton} onClick={enableCam}>Loading...</button>
+                <button className="bg-blue-400 hover:bg-blue-500 rounded-lg p-2 w-[30%] transition" disabled={disableButton} onClick={saveScore}>Save Score</button>
             </div>
 
             <div className="bg-black/25 h-[480px] w-[854px] rounded-2xl">
