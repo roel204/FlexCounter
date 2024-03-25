@@ -1,6 +1,7 @@
 import {useEffect, useRef, useState} from 'react';
 import {PoseLandmarker, FilesetResolver, DrawingUtils,} from '@mediapipe/tasks-vision'
 import kNear from "./knear.js"
+// import Test from "./test.jsx";
 
 function CounterPage() {
     const videoElement = useRef(null)
@@ -26,6 +27,7 @@ function CounterPage() {
     const [rTotal, setRTotal] = useState(0)
     const [lRecord, setLRecord] = useState(0)
     const [rRecord, setRRecord] = useState(0)
+
     const [activeModel, setActiveModel] = useState("Logic")
 
     useEffect(() => {
@@ -280,6 +282,8 @@ function CounterPage() {
                 <video autoPlay playsInline id="webcam" className="absolute h-[480px] w-[854px] rounded-2xl" ref={videoElement}></video>
                 <canvas id="output_canvas" className="absolute rounded-2xl" width={videoWidth} height={videoHeight} ref={canvasElement}></canvas>
             </div>
+
+            {/*<Test></Test>*/}
         </div>
     )
 
