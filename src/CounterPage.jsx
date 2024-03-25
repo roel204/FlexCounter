@@ -1,7 +1,7 @@
-import {useEffect, useRef, useState} from 'react';
+import {useRef, useState} from 'react';
 import {PoseLandmarker, FilesetResolver, DrawingUtils,} from '@mediapipe/tasks-vision'
 import kNear from "./knear.js"
-// import Test from "./test.jsx";
+import ScoreComponent from "./ScoreComponent.jsx";
 
 function CounterPage() {
     const videoElement = useRef(null)
@@ -20,22 +20,8 @@ function CounterPage() {
 
     let lDown = false
     let rDown = false
-    const [lScore, setLScore] = useState(0)
-    const [rScore, setRScore] = useState(0)
-
-    const [lTotal, setLTotal] = useState(0)
-    const [rTotal, setRTotal] = useState(0)
-    const [lRecord, setLRecord] = useState(0)
-    const [rRecord, setRRecord] = useState(0)
 
     const [activeModel, setActiveModel] = useState("Logic")
-
-    useEffect(() => {
-        setLTotal(parseInt(localStorage.getItem("lTotal") || 0))
-        setRTotal(parseInt(localStorage.getItem("rTotal") || 0))
-        setLRecord(parseInt(localStorage.getItem("lRecord") || 0))
-        setRRecord(parseInt(localStorage.getItem("rRecord") || 0))
-    }, []);
 
     const delay = async (ms) => {
         return new Promise((resolve) =>
@@ -205,30 +191,6 @@ function CounterPage() {
         setActiveModel((prevState) => (prevState === "Logic" ? "KNN" : "Logic"));
     }
 
-    function saveScore() {
-        const newLTotal = lTotal + lScore
-        const newRTotal = rTotal + rScore
-
-        setLTotal(newLTotal)
-        setRTotal(newRTotal)
-
-        localStorage.setItem("lTotal", newLTotal)
-        localStorage.setItem("rTotal", newRTotal)
-
-        if (lScore > lRecord) {
-            localStorage.setItem("lRecord", lScore)
-            setLRecord(lScore)
-        }
-
-        if (rScore > rRecord) {
-            localStorage.setItem("rRecord", rScore)
-            setRRecord(rScore)
-        }
-
-        setLScore(0)
-        setRScore(0)
-    }
-
     async function getDataPoints() {
         for (let i = 0; i < 5; i++) {
             await delay(4000);
@@ -251,39 +213,18 @@ function CounterPage() {
 
             <h1 className="text-7xl font-bold">FLEX COUNTER</h1>
 
-            <div className="flex flex-row gap-4 w-[854px] h-[25vh] justify-between">
-                <div className="w-[30%] bg-black/25 rounded-2xl p-4 text-center">
-                    <p className="text-5xl">Left</p>
-                    <p className="text-9xl">{lScore}</p>
-                </div>
-                <div className="flex flex-col justify-between w-[40%] items-center">
-                    <div className="w-full h-full bg-black/25 rounded-2xl p-4 mb-2 text-center">
-                        <p className="text-3xl">Total</p>
-                        <p className="text-4xl">{lTotal} + {rTotal}</p>
-                    </div>
-                    <div className="w-full h-full bg-black/25 rounded-2xl p-4 text-center">
-                        <p className="text-3xl">Record</p>
-                        <p className="text-4xl">{lRecord} + {rRecord}</p>
-                    </div>
-                </div>
-                <div className="w-[30%] bg-black/25 rounded-2xl p-4 text-center">
-                    <p className="text-5xl">Right</p>
-                    <p className="text-9xl">{rScore}</p>
-                </div>
-            </div>
+            <ScoreComponent />
 
             <div className="w-[854px] flex gap-4">
                 <button className="bg-red-500 hover:bg-red-600 rounded-lg p-2 w-[30%] transition" disabled={disableButton} onClick={changeModel}>Tracking Model: {activeModel}</button>
                 <button className="bg-lime-500 hover:bg-lime-600 rounded-lg p-2 w-[40%] transition" disabled={disableButton} ref={enableWebcamButton} onClick={enableCam}>Loading...</button>
-                <button className="bg-blue-400 hover:bg-blue-500 rounded-lg p-2 w-[30%] transition" disabled={disableButton} onClick={saveScore}>Save Score</button>
+                <button className="bg-blue-400 hover:bg-blue-500 rounded-lg p-2 w-[30%] transition" disabled={disableButton} onClick={() => {ScoreComponent.getAlert()}}>Save Score</button>
             </div>
 
             <div className="bg-black/25 h-[480px] w-[854px] rounded-2xl">
                 <video autoPlay playsInline id="webcam" className="absolute h-[480px] w-[854px] rounded-2xl" ref={videoElement}></video>
                 <canvas id="output_canvas" className="absolute rounded-2xl" width={videoWidth} height={videoHeight} ref={canvasElement}></canvas>
             </div>
-
-            {/*<Test></Test>*/}
         </div>
     )
 
