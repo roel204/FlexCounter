@@ -12,6 +12,6 @@ nn.load(modelDetails, () => console.log("het model is geladen!"))
 
 // Run a test on the model
 export async function testModel() {
-    const results = await nn.classify([29, 11, 10, 3])
+    const results = await nn.classify([0.3021, 0.5212, 0.5322])
     console.log(results)
 }
