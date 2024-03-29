@@ -1,6 +1,7 @@
 // eslint-disable-next-line no-undef
-const nn = ml5.neuralNetwork({ task: 'classification', debug: true })
+const nn = ml5.neuralNetwork({task: 'classification', debug: true})
 
+// Load the model
 const modelDetails = {
     model: 'public/model/model.json',
     metadata: 'public/model/model_meta.json',
@@ -9,7 +10,8 @@ const modelDetails = {
 
 nn.load(modelDetails, () => console.log("het model is geladen!"))
 
+// Run a test on the model
 export async function testModel() {
-    const results = await nn.classify([29,11,10,3])
+    const results = await nn.classify([29, 11, 10, 3])
     console.log(results)
 }

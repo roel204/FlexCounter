@@ -80,10 +80,10 @@ function ScoreComponent({lScore, rScore, setRScore, setLScore}) {
                     <p className="text-9xl">{rScore}</p>
                 </div>
             </div>
-            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-20 left-2" onClick={saveScore}>Save Score</button>
-            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-40 left-2" onClick={resetTotal}>Reset Total</button>
-            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-60 left-2" onClick={resetRecord}>Reset Record</button>
-            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-80 left-2" onClick={resetScore}>Reset Score</button>
+            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-2 left-2" onClick={saveScore}>Save Score</button>
+            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-20 left-2" onClick={resetTotal}>Reset Total</button>
+            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-40 left-2" onClick={resetRecord}>Reset Record</button>
+            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-60 left-2" onClick={resetScore}>Reset Score</button>
         </>
     )
 }
