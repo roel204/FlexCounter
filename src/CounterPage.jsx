@@ -20,6 +20,8 @@ function CounterPage() {
 
     let lDown = false
     let rDown = false
+    const [lScore, setLScore] = useState(0)
+    const [rScore, setRScore] = useState(0)
 
     const [activeModel, setActiveModel] = useState("Logic")
 
@@ -210,15 +212,19 @@ function CounterPage() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#ff8c00] to-[#ffe312] flex flex-col items-center justify-center gap-4 text-white">
             <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-2 left-2" onClick={getDataPoints}>Train Data</button>
+            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-2 left-40" onClick={() => {
+                setLScore((lScore) => lScore + 1)
+            }}>Test Points
+            </button>
 
             <h1 className="text-7xl font-bold">FLEX COUNTER</h1>
 
-            <ScoreComponent />
+            <ScoreComponent lScore={lScore} rScore={rScore} setLScore={setLScore} setRScore={setLScore}/>
 
             <div className="w-[854px] flex gap-4">
                 <button className="bg-red-500 hover:bg-red-600 rounded-lg p-2 w-[30%] transition" disabled={disableButton} onClick={changeModel}>Tracking Model: {activeModel}</button>
                 <button className="bg-lime-500 hover:bg-lime-600 rounded-lg p-2 w-[40%] transition" disabled={disableButton} ref={enableWebcamButton} onClick={enableCam}>Loading...</button>
-                <button className="bg-blue-400 hover:bg-blue-500 rounded-lg p-2 w-[30%] transition" disabled={disableButton} onClick={() => {ScoreComponent.getAlert()}}>Save Score</button>
+                <button className="bg-blue-400 hover:bg-blue-500 rounded-lg p-2 w-[30%] transition" disabled={disableButton} >Save Score</button>
             </div>
 
             <div className="bg-black/25 h-[480px] w-[854px] rounded-2xl">

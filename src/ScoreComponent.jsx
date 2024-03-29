@@ -1,8 +1,6 @@
 import {useEffect, useState} from "react";
 
-function ScoreComponent() {
-    const [lScore, setLScore] = useState(0)
-    const [rScore, setRScore] = useState(0)
+function ScoreComponent({lScore, rScore, setRScore, setLScore}) {
     const [lTotal, setLTotal] = useState(0)
     const [rTotal, setRTotal] = useState(0)
     const [lRecord, setLRecord] = useState(0)
@@ -14,10 +12,6 @@ function ScoreComponent() {
         setLRecord(parseInt(localStorage.getItem("lRecord") || 0))
         setRRecord(parseInt(localStorage.getItem("rRecord") || 0))
     }, []);
-
-    function getAlert() {
-        alert("getAlert from Child");
-    }
 
     function saveScore() {
         const newLTotal = lTotal + lScore
@@ -44,26 +38,29 @@ function ScoreComponent() {
     }
 
     return (
-        <div className="flex flex-row gap-4 w-[854px] h-[25vh] justify-between">
-            <div className="w-[30%] bg-black/25 rounded-2xl p-4 text-center">
-                <p className="text-5xl">Left</p>
-                <p className="text-9xl">{lScore}</p>
-            </div>
-            <div className="flex flex-col justify-between w-[40%] items-center">
-                <div className="w-full h-full bg-black/25 rounded-2xl p-4 mb-2 text-center">
-                    <p className="text-3xl">Total</p>
-                    <p className="text-4xl">{lTotal} + {rTotal}</p>
+        <>
+            <div className="flex flex-row gap-4 w-[854px] h-[25vh] justify-between">
+                <div className="w-[30%] bg-black/25 rounded-2xl p-4 text-center">
+                    <p className="text-5xl">Left</p>
+                    <p className="text-9xl">{lScore}</p>
                 </div>
-                <div className="w-full h-full bg-black/25 rounded-2xl p-4 text-center">
-                    <p className="text-3xl">Record</p>
-                    <p className="text-4xl">{lRecord} + {rRecord}</p>
+                <div className="flex flex-col justify-between w-[40%] items-center">
+                    <div className="w-full h-full bg-black/25 rounded-2xl p-4 mb-2 text-center">
+                        <p className="text-3xl">Total</p>
+                        <p className="text-4xl">{lTotal} + {rTotal}</p>
+                    </div>
+                    <div className="w-full h-full bg-black/25 rounded-2xl p-4 text-center">
+                        <p className="text-3xl">Record</p>
+                        <p className="text-4xl">{lRecord} + {rRecord}</p>
+                    </div>
+                </div>
+                <div className="w-[30%] bg-black/25 rounded-2xl p-4 text-center">
+                    <p className="text-5xl">Right</p>
+                    <p className="text-9xl">{rScore}</p>
                 </div>
             </div>
-            <div className="w-[30%] bg-black/25 rounded-2xl p-4 text-center">
-                <p className="text-5xl">Right</p>
-                <p className="text-9xl">{rScore}</p>
-            </div>
-        </div>
+            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-2 left-80" onClick={saveScore}>Save Score</button>
+        </>
     )
 }
 
