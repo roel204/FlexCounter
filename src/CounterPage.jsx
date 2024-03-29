@@ -23,9 +23,10 @@ function CounterPage() {
 
     let lDown = false
     let rDown = false
+    let nnResLeft = ""
+    let nnResRight = ""
     const [lScore, setLScore] = useState(0)
     const [rScore, setRScore] = useState(0)
-    let nnResLeft = ""
 
     const [disableButton, setDisableButton] = useState(true)
     const [activeModel, setActiveModel] = useState("Logic")
@@ -150,7 +151,7 @@ function CounterPage() {
                     // eslint-disable-next-line react-hooks/rules-of-hooks
                     useNN(lShoulderY, lElbowY, lHandY).then(r => nnResLeft = r)
 
-                    console.log(`Left is ${nnResLeft}`)
+                    console.log(`NN Left is ${nnResLeft}`)
 
                     if (nnResLeft === "up") {
                         if (lDown) {
@@ -198,6 +199,23 @@ function CounterPage() {
                         rDown = true
                     }
 
+                } else if (modelRef.current === "NN") {
+                    // eslint-disable-next-line react-hooks/rules-of-hooks
+                    useNN(rShoulderY, rElbowY, rHandY).then(r => nnResRight = r)
+
+                    console.log(`NN Right is ${nnResRight}`)
+
+                    if (nnResRight === "up") {
+                        if (rDown) {
+                            setRScore((rScore) => rScore + 1)
+                            rDown = false
+                        }
+                    }
+
+                    if (nnResRight === "down") {
+                        rDown = true
+                    }
+
                 } else {
                     if (rHandY < rShoulderY) {
                         if (rDown) {
@@ -226,7 +244,7 @@ function CounterPage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#ff8c00] to-[#ffe312] flex flex-col items-center justify-center gap-4 text-white">
-            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-2 left-2" onClick={() => {
+            <button className="bg-purple-400 hover:bg-purple-500 rounded p-2 absolute top-2 left-2" onClick={() => {
                 getDataPoints(landmarkerRef.current)
             }}>Train KNN
             </button>
