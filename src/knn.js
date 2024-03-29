@@ -1,11 +1,9 @@
-
-
 const delay = async (ms) => {
     return new Promise((resolve) =>
         setTimeout(resolve, ms));
 };
 
-function trainKnn(machine) {
+export function trainKnn(machine) {
     machine.learn([0.29699888825416565, 0.5170987844467163, 0.19376200437545776], 'up')
     machine.learn([0.25645995140075684, 0.5157449245452881, 0.18175971508026123], 'up')
     machine.learn([0.29640400409698486, 0.5498039722442627, 0.23758822679519653], 'up')
@@ -35,5 +33,3 @@ export async function getDataPoints(poseLandmarker) {
         }
     }
 }
-
-export default trainKnn;
