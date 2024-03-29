@@ -3,6 +3,8 @@ import {DrawingUtils, FilesetResolver, PoseLandmarker,} from '@mediapipe/tasks-v
 import ScoreComponent from "./ScoreComponent.jsx";
 import {trainKnn, getDataPoints} from "./knn.js";
 import kNear from "./knear.js";
+import {saveModel, startTraining} from "./trainNN.js";
+import {testModel} from "./useNN.js";
 
 function CounterPage() {
     const videoElement = useRef(null)
@@ -34,12 +36,9 @@ function CounterPage() {
     }, [activeModel]);
 
     // Create machineRef and train the KNN model
-    const machineRef = useRef(null);
+    const machineRef = useRef(new kNear(3));
     useEffect(() => {
-        if (!machineRef.current) {
-            machineRef.current = new kNear(3);
-            trainKnn(machineRef.current);
-        }
+        trainKnn(machineRef.current);
     }, []);
 
     // Setup Camera and PoseLandmarker
@@ -207,6 +206,9 @@ function CounterPage() {
                 getDataPoints(landmarkerRef.current)
             }}>Train Data
             </button>
+            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-2 left-32" onClick={startTraining}>Train NN</button>
+            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-20 left-32" onClick={saveModel}>Save NN</button>
+            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-40 left-32" onClick={testModel}>Test NN</button>
 
             <h1 className="text-7xl font-bold">FLEX COUNTER</h1>
 

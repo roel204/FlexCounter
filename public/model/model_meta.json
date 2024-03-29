@@ -1,0 +1,1 @@
+{"inputUnits":[4],"outputUnits":2,"inputs":{"0":{"dtype":"number","min":18,"max":20.1},"1":{"dtype":"number","min":9.2,"max":17},"2":{"dtype":"number","min":8.1,"max":15},"3":{"dtype":"number","min":2,"max":5.5}},"outputs":{"label":{"dtype":"string","min":0,"max":1,"uniqueValues":["cat","dog"],"legend":{"cat":[1,0],"dog":[0,1]}}},"isNormalized":true}
