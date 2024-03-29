@@ -1,7 +1,8 @@
-import {useRef, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {PoseLandmarker, FilesetResolver, DrawingUtils,} from '@mediapipe/tasks-vision'
-import kNear from "./knear.js"
 import ScoreComponent from "./ScoreComponent.jsx";
+import trainKnn, {getDataPoints} from "./knn.js";
+import kNear from "./knear.js";
 
 function CounterPage() {
     const videoElement = useRef(null)
@@ -24,11 +25,20 @@ function CounterPage() {
     const [rScore, setRScore] = useState(0)
 
     const [activeModel, setActiveModel] = useState("Logic")
+    const modelRef = useRef(activeModel)
 
-    const delay = async (ms) => {
-        return new Promise((resolve) =>
-            setTimeout(resolve, ms));
-    };
+    useEffect(() => {
+        modelRef.current = activeModel
+    }, [activeModel]);
+
+    const machineRef = useRef(null);
+
+    useEffect(() => {
+        if (!machineRef.current) {
+            machineRef.current = new kNear(3);
+            trainKnn(machineRef.current);
+        }
+    }, []);
 
     // Setup user camera
     function startApp() {
@@ -54,7 +64,6 @@ function CounterPage() {
             runningMode: "VIDEO",
             numPoses: 2
         });
-        await delay(500)
         setDisableButton(false)
         enableWebcamButton.current.innerText = "Enable Webcam"
     };
@@ -90,23 +99,6 @@ function CounterPage() {
         });
     }
 
-    const k = 3
-    const machine = new kNear(k);
-
-    machine.learn([0.29699888825416565, 0.5170987844467163, 0.19376200437545776], 'up')
-    machine.learn([0.25645995140075684, 0.5157449245452881, 0.18175971508026123], 'up')
-    machine.learn([0.29640400409698486, 0.5498039722442627, 0.23758822679519653], 'up')
-    machine.learn([0.29363715648651123, 0.5336388945579529, 0.28399333357810974], 'up')
-    machine.learn([0.31886687874794006, 0.46447107195854187, 0.16273164749145508], 'up')
-
-    machine.learn([0.30467694997787476, 0.5444952845573425, 0.7781786918640137], 'down')
-    machine.learn([0.31995970010757446, 0.5650004744529724, 0.7957270741462708], 'down')
-    machine.learn([0.29677191376686096, 0.5260168313980103, 0.6818185448646545], 'down')
-    machine.learn([0.33023908734321594, 0.5576013922691345, 0.68390953540802], 'down')
-    machine.learn([0.2913947105407715, 0.551878809928894, 0.6582819223403931], 'down')
-    console.log("KNN Trained")
-
-
     async function predictWebcam() {
         let startTimeMs = performance.now();
         canvasCtx = canvasElement.current.getContext("2d");
@@ -134,11 +126,9 @@ function CounterPage() {
                 let lElbowY = poseLandmarker.landmarks[0][14].y
                 let lHandY = poseLandmarker.landmarks[0][20].y
 
-                if (activeModel === "KNN") {
-                    console.log("KNN")
-
-                    let prediction = machine.classify([lShoulderY, lElbowY, lHandY])
-                    console.log(`I think this is ${prediction}`)
+                if (modelRef.current === "KNN") {
+                    let prediction = machineRef.current.classify([lShoulderY, lElbowY, lHandY])
+                    console.log(`Left is ${prediction}`)
 
                     if (prediction === "up") {
                         if (lDown) {
@@ -152,7 +142,6 @@ function CounterPage() {
                     }
 
                 } else {
-                    console.log("Logic")
 
                     if (lHandY < lShoulderY) {
                         if (lDown) {
@@ -164,7 +153,6 @@ function CounterPage() {
                     if (lHandY > lElbowY) {
                         lDown = true
                     }
-
                 }
             }
 
@@ -173,15 +161,32 @@ function CounterPage() {
                 let rElbowY = poseLandmarker.landmarks[0][13].y
                 let rHandY = poseLandmarker.landmarks[0][19].y
 
-                if (rHandY < rShoulderY) {
-                    if (rDown) {
-                        setRScore((rScore) => rScore + 1)
-                        rDown = false
-                    }
-                }
+                if (modelRef.current === "KNN") {
+                    let prediction = machineRef.current.classify([rShoulderY, rElbowY, rHandY])
+                    console.log(`Right is ${prediction}`)
 
-                if (rHandY > rElbowY) {
-                    rDown = true
+                    if (prediction === "up") {
+                        if (rDown) {
+                            setRScore((rScore) => rScore + 1)
+                            rDown = false
+                        }
+                    }
+
+                    if (prediction === "down") {
+                        rDown = true
+                    }
+
+                } else {
+                    if (rHandY < rShoulderY) {
+                        if (rDown) {
+                            setRScore((rScore) => rScore + 1)
+                            rDown = false
+                        }
+                    }
+
+                    if (rHandY > rElbowY) {
+                        rDown = true
+                    }
                 }
             }
         }
@@ -189,29 +194,12 @@ function CounterPage() {
 
     startApp()
 
-    function changeModel() {
-        setActiveModel((prevState) => (prevState === "Logic" ? "KNN" : "Logic"));
-    }
-
-    async function getDataPoints() {
-        for (let i = 0; i < 5; i++) {
-            await delay(4000);
-
-            if (poseLandmarker.landmarks[0]) {
-                let lShoulder = poseLandmarker.landmarks[0][12]
-                let lElbow = poseLandmarker.landmarks[0][14]
-                let lHand = poseLandmarker.landmarks[0][20]
-
-                if (lShoulder.visibility > 0.9 && lElbow.visibility > 0.9 && lHand.visibility > 0.9) {
-                    console.log({pose: [lShoulder.y, lElbow.y, lHand.y], label: "up/down"})
-                }
-            }
-        }
-    }
-
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#ff8c00] to-[#ffe312] flex flex-col items-center justify-center gap-4 text-white">
-            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-2 left-2" onClick={getDataPoints}>Train Data</button>
+            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-2 left-2" onClick={() => {
+                getDataPoints(poseLandmarker)
+            }}>Train Data
+            </button>
             <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-2 left-40" onClick={() => {
                 setLScore((lScore) => lScore + 1)
             }}>Test Points
@@ -219,12 +207,14 @@ function CounterPage() {
 
             <h1 className="text-7xl font-bold">FLEX COUNTER</h1>
 
-            <ScoreComponent lScore={lScore} rScore={rScore} setLScore={setLScore} setRScore={setLScore}/>
+            <ScoreComponent lScore={lScore} rScore={rScore} setLScore={setLScore} setRScore={setRScore}/>
 
             <div className="w-[854px] flex gap-4">
-                <button className="bg-red-500 hover:bg-red-600 rounded-lg p-2 w-[30%] transition" disabled={disableButton} onClick={changeModel}>Tracking Model: {activeModel}</button>
+                <button className="bg-red-500 hover:bg-red-600 rounded-lg p-2 w-[30%] transition" disabled={disableButton} onClick={() => {
+                    setActiveModel((prevState) => (prevState === "Logic" ? "KNN" : "Logic"));
+                }}>Tracking Model: {activeModel}</button>
                 <button className="bg-lime-500 hover:bg-lime-600 rounded-lg p-2 w-[40%] transition" disabled={disableButton} ref={enableWebcamButton} onClick={enableCam}>Loading...</button>
-                <button className="bg-blue-400 hover:bg-blue-500 rounded-lg p-2 w-[30%] transition" disabled={disableButton} >Save Score</button>
+                <button className="bg-blue-400 hover:bg-blue-500 rounded-lg p-2 w-[30%] transition" disabled={disableButton}>Save Score</button>
             </div>
 
             <div className="bg-black/25 h-[480px] w-[854px] rounded-2xl">
