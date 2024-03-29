@@ -8,10 +8,10 @@ const modelDetails = {
     weights: 'public/model/model.weights.bin'
 }
 
-nn.load(modelDetails, () => console.log("het model is geladen!"))
+nn.load(modelDetails, () => console.log("NN Model has been loaded"))
 
-// Run a test on the model
-export async function testModel() {
-    const results = await nn.classify([0.3021, 0.5212, 0.5322])
-    console.log(results)
+// Run the model
+export async function useNN(y1, y2, y3) {
+    const result = await nn.classify([y1, y2, y3])
+    return(result[0].label)
 }

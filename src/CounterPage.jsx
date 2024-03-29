@@ -4,7 +4,7 @@ import ScoreComponent from "./ScoreComponent.jsx";
 import {trainKnn, getDataPoints} from "./trainKNN.js";
 import kNear from "./knear.js";
 import {saveModel, startTraining} from "./trainNN.js";
-import {testModel} from "./useNN.js";
+import {useNN} from "./useNN.js";
 
 function CounterPage() {
     const videoElement = useRef(null)
@@ -25,6 +25,7 @@ function CounterPage() {
     let rDown = false
     const [lScore, setLScore] = useState(0)
     const [rScore, setRScore] = useState(0)
+    let nnResLeft = ""
 
     const [disableButton, setDisableButton] = useState(true)
     const [activeModel, setActiveModel] = useState("Logic")
@@ -65,7 +66,7 @@ function CounterPage() {
                     delegate: "GPU"
                 },
                 runningMode: "VIDEO",
-                numPoses: 2
+                numPoses: 1
             })
             setDisableButton(false)
             enableWebcamButton.current.innerText = "Enable Webcam"
@@ -145,8 +146,24 @@ function CounterPage() {
                         lDown = true
                     }
 
-                } else {
+                } else if (modelRef.current === "NN") {
+                    // eslint-disable-next-line react-hooks/rules-of-hooks
+                    useNN(lShoulderY, lElbowY, lHandY).then(r => nnResLeft = r)
 
+                    console.log(`Left is ${nnResLeft}`)
+
+                    if (nnResLeft === "up") {
+                        if (lDown) {
+                            setLScore((lScore) => lScore + 1)
+                            lDown = false
+                        }
+                    }
+
+                    if (nnResLeft === "down") {
+                        lDown = true
+                    }
+
+                } else {
                     if (lHandY < lShoulderY) {
                         if (lDown) {
                             setLScore((lScore) => lScore + 1)
@@ -200,6 +217,13 @@ function CounterPage() {
         }
     }
 
+    function switchModel() {
+        const models = ["Logic", "KNN", "NN"];
+        const currentIndex = models.indexOf(activeModel);
+        const nextIndex = (currentIndex + 1) % models.length;
+        setActiveModel(models[nextIndex]);
+    }
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#ff8c00] to-[#ffe312] flex flex-col items-center justify-center gap-4 text-white">
             <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-2 left-2" onClick={() => {
@@ -208,16 +232,13 @@ function CounterPage() {
             </button>
             <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-20 left-2" onClick={startTraining}>Train NN</button>
             <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-40 left-2" onClick={saveModel}>Save NN</button>
-            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-60 left-2" onClick={testModel}>Test NN</button>
 
             <h1 className="text-7xl font-bold">FLEX COUNTER</h1>
 
             <ScoreComponent lScore={lScore} rScore={rScore} setLScore={setLScore} setRScore={setRScore}/>
 
             <div className="w-[854px] flex gap-4">
-                <button className="bg-blue-500 hover:bg-blue-600 rounded-lg p-2 w-[29%] transition" disabled={disableButton} onClick={() => {
-                    setActiveModel((prevState) => (prevState === "Logic" ? "KNN" : "Logic"));
-                }}>Tracking Model: {activeModel}</button>
+                <button className="bg-blue-500 hover:bg-blue-600 rounded-lg p-2 w-[29%] transition" disabled={disableButton} onClick={switchModel}>Tracking Model: {activeModel}</button>
                 <button className="bg-lime-500 hover:bg-lime-600 rounded-lg p-2 w-[70%] transition" disabled={disableButton} ref={enableWebcamButton} onClick={enableCam}>Loading...</button>
             </div>
 
