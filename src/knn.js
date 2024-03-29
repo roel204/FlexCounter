@@ -3,6 +3,7 @@ const delay = async (ms) => {
         setTimeout(resolve, ms));
 };
 
+// Train the model
 export function trainKnn(machine) {
     machine.learn([0.29699888825416565, 0.5170987844467163, 0.19376200437545776], 'up')
     machine.learn([0.25645995140075684, 0.5157449245452881, 0.18175971508026123], 'up')
@@ -18,6 +19,7 @@ export function trainKnn(machine) {
     console.log("KNN Trained")
 }
 
+// Get datapoints in the console for when training model
 export async function getDataPoints(poseLandmarker) {
     for (let i = 0; i < 5; i++) {
         await delay(4000);

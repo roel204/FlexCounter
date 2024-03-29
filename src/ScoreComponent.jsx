@@ -6,6 +6,7 @@ function ScoreComponent({lScore, rScore, setRScore, setLScore}) {
     const [lRecord, setLRecord] = useState(0)
     const [rRecord, setRRecord] = useState(0)
 
+    // Get total & record from localstorage
     useEffect(() => {
         setLTotal(parseInt(localStorage.getItem("lTotal") || 0))
         setRTotal(parseInt(localStorage.getItem("rTotal") || 0))
@@ -13,6 +14,7 @@ function ScoreComponent({lScore, rScore, setRScore, setLScore}) {
         setRRecord(parseInt(localStorage.getItem("rRecord") || 0))
     }, []);
 
+    // Function to save total & record into localstorage
     function saveScore() {
         const newLTotal = lTotal + lScore
         const newRTotal = rTotal + rScore
