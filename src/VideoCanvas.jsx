@@ -24,14 +24,14 @@ function VideoCanvas({videoHeight, videoWidth, videoElement, canvasElement}) {
                 autoPlay
                 playsInline
                 id="webcam"
-                className={`absolute aspect-video rounded-2xl`}
+                className={`absolute aspect-video rounded-2xl -scale-x-100`}
                 width={videoWidth.current}
                 height={videoHeight.current}
                 ref={videoElement}
             ></video>
             <canvas
                 id="output_canvas"
-                className={`absolute aspect-video rounded-2xl`}
+                className={`absolute aspect-video rounded-2xl -scale-x-100`}
                 width={videoWidth.current}
                 height={videoHeight.current}
                 ref={canvasElement}
