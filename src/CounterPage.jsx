@@ -5,6 +5,7 @@ import {trainKnn, getDataPoints} from "./trainKNN.js";
 import kNear from "./knear.js";
 import {saveModel, startTraining} from "./trainNN.js";
 import {useNN} from "./useNN.js";
+import VideoCanvas from "./VideoCanvas.jsx";
 
 function CounterPage() {
     const videoElement = useRef(null)
@@ -16,10 +17,8 @@ function CounterPage() {
 
     let predictionsRunning = false;
     let lastVideoTime = -1;
-    const videoHeight = "480px";
-    const videoWidth = "854px";
-    // const videoHeight = "720px";
-    // const videoWidth = "1280px";
+    const videoHeight = useRef("480px");
+    const videoWidth = useRef("854px");
 
     let lDown = false
     let rDown = false
@@ -72,6 +71,8 @@ function CounterPage() {
             setDisableButton(false)
             enableWebcamButton.current.innerText = "Enable Webcam"
         };
+        // canvasElement.current.width = videoElement.current.width
+        // canvasElement.current.height = videoElement.current.height
 
         startApp()
     }, []);
@@ -243,27 +244,25 @@ function CounterPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#ff8c00] to-[#ffe312] flex flex-col items-center justify-center gap-4 text-white">
-            <button className="bg-purple-400 hover:bg-purple-500 rounded p-2 absolute top-2 left-2" onClick={() => {
-                getDataPoints(landmarkerRef.current)
-            }}>Train KNN
-            </button>
-            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-20 left-2" onClick={startTraining}>Train NN</button>
-            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-40 left-2" onClick={saveModel}>Save NN</button>
+        <div className="min-h-screen bg-gradient-to-br from-[#ff8c00] to-[#ffe312] flex flex-col lg:items-center lg:justify-center gap-4 text-white">
+            {/*<button className="bg-purple-400 hover:bg-purple-500 rounded p-2 absolute top-2 left-2" onClick={() => {*/}
+            {/*    getDataPoints(landmarkerRef.current)*/}
+            {/*}}>Get Data*/}
+            {/*</button>*/}
+            {/*<button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-20 left-2" onClick={startTraining}>Train NN</button>*/}
+            {/*<button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-40 left-2" onClick={saveModel}>Save NN</button>*/}
 
-            <h1 className="text-7xl font-bold">FLEX COUNTER</h1>
+            <h1 className="text-5xl lg:text-7xl font-bold text-center">FLEX COUNTER</h1>
 
             <ScoreComponent lScore={lScore} rScore={rScore} setLScore={setLScore} setRScore={setRScore}/>
 
-            <div className="w-[854px] flex gap-4">
-                <button className="bg-blue-500 hover:bg-blue-600 rounded-lg p-2 w-[29%] transition" disabled={disableButton} onClick={switchModel}>Tracking Model: {activeModel}</button>
+            <div className="w-full lg:w-[854px] flex gap-4">
+                <button className="text-sm lg:text-base bg-blue-500 hover:bg-blue-600 rounded-lg p-2 w-[29%] transition" disabled={disableButton} onClick={switchModel}>Tracking
+                    Model: {activeModel}</button>
                 <button className="bg-lime-500 hover:bg-lime-600 rounded-lg p-2 w-[70%] transition" disabled={disableButton} ref={enableWebcamButton} onClick={enableCam}>Loading...</button>
             </div>
 
-            <div className="bg-black/25 h-[480px] w-[854px] rounded-2xl">
-                <video autoPlay playsInline id="webcam" className={`absolute h-[${videoHeight}] w-[${videoWidth}] rounded-2xl`} ref={videoElement}></video>
-                <canvas id="output_canvas" className="absolute rounded-2xl" width={videoWidth} height={videoHeight} ref={canvasElement}></canvas>
-            </div>
+            <VideoCanvas videoWidth={videoWidth} videoHeight={videoHeight} videoElement={videoElement} canvasElement={canvasElement}/>
         </div>
     )
 
