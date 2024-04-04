@@ -1,11 +1,12 @@
 import {useEffect, useRef, useState} from 'react';
 import {DrawingUtils, FilesetResolver, PoseLandmarker,} from '@mediapipe/tasks-vision'
 import ScoreComponent from "./ScoreComponent.jsx";
-import {trainKnn, getDataPoints} from "./trainKNN.js";
+import VideoCanvas from "./VideoCanvas.jsx";
 import kNear from "./knear.js";
+import {trainKnn} from "./trainKNN.js";
 import {saveModel, startTraining} from "./trainNN.js";
 import {useNN} from "./useNN.js";
-import VideoCanvas from "./VideoCanvas.jsx";
+import {getDataPoints} from "./getDataPoints.js";
 
 function CounterPage() {
     const videoElement = useRef(null)
@@ -140,7 +141,7 @@ function CounterPage() {
 
             if (modelRef.current === "KNN") {
                 let prediction = machineRef.current.classify([lShoulderY, lElbowY, lHandY])
-                console.log(`KNN Left is ${prediction}`)
+                // console.log(`KNN Left is ${prediction}`)
 
                 if (prediction === "up") {
                     if (lDown) {
@@ -156,7 +157,7 @@ function CounterPage() {
             } else if (modelRef.current === "NN") {
                 // eslint-disable-next-line react-hooks/rules-of-hooks
                 useNN(lShoulderY, lElbowY, lHandY).then(r => nnResLeft = r)
-                console.log(`NN Left is ${nnResLeft}`)
+                // console.log(`NN Left is ${nnResLeft}`)
 
                 if (nnResLeft === "up") {
                     if (lDown) {
@@ -172,14 +173,14 @@ function CounterPage() {
             } else {
                 if (lHandY < lShoulderY) {
                     if (lDown) {
-                        console.log("Logic Left is up")
+                        // console.log("Logic Left is up")
                         setLScore((lScore) => lScore + 1)
                         lDown = false
                     }
                 }
 
                 if (lHandY > lElbowY) {
-                    console.log("Logic Left is down")
+                    // console.log("Logic Left is down")
                     lDown = true
                 }
             }
@@ -193,7 +194,7 @@ function CounterPage() {
 
             if (modelRef.current === "KNN") {
                 let prediction = machineRef.current.classify([rShoulderY, rElbowY, rHandY])
-                console.log(`KNN Right is ${prediction}`)
+                // console.log(`KNN Right is ${prediction}`)
 
                 if (prediction === "up") {
                     if (rDown) {
@@ -209,7 +210,7 @@ function CounterPage() {
             } else if (modelRef.current === "NN") {
                 // eslint-disable-next-line react-hooks/rules-of-hooks
                 useNN(rShoulderY, rElbowY, rHandY).then(r => nnResRight = r)
-                console.log(`NN Right is ${nnResRight}`)
+                // console.log(`NN Right is ${nnResRight}`)
 
                 if (nnResRight === "up") {
                     if (rDown) {
@@ -225,14 +226,14 @@ function CounterPage() {
             } else {
                 if (rHandY < rShoulderY) {
                     if (rDown) {
-                        console.log("Logic Right is up")
+                        // console.log("Logic Right is up")
                         setRScore((rScore) => rScore + 1)
                         rDown = false
                     }
                 }
 
                 if (rHandY > rElbowY) {
-                    console.log("Logic Right is down")
+                    // console.log("Logic Right is down")
                     rDown = true
                 }
             }
