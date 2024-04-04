@@ -13,5 +13,5 @@ nn.load(modelDetails, () => console.log("NN Model has been loaded"))
 // Run the model
 export async function useNN(y1, y2, y3) {
     const result = await nn.classify([y1, y2, y3])
-    return(result[0].label)
+    return(result)
 }
