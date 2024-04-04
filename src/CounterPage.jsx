@@ -45,7 +45,7 @@ function CounterPage() {
     // Setup Camera and PoseLandmarker
     useEffect(() => {
         // Setup user camera
-        function startApp() {
+        const startApp = () => {
             const hasGetUserMedia = () => {
                 let _a;
                 return !!((_a = navigator.mediaDevices) === null || _a === void 0 ? void 0 : _a.getUserMedia);
@@ -71,14 +71,12 @@ function CounterPage() {
             setDisableButton(false)
             enableWebcamButton.current.innerText = "Enable Webcam"
         };
-        // canvasElement.current.width = videoElement.current.width
-        // canvasElement.current.height = videoElement.current.height
 
         startApp()
     }, []);
 
     // Enable the live webcam view and start detection or toggle predictions
-    function enableCam() {
+    const enableCam = () => {
 
         if (!landmarkerRef.current) {
             window.alert("Wait! poseLandmaker not loaded yet.");
@@ -105,7 +103,7 @@ function CounterPage() {
         });
     }
 
-    async function predictWebcam() {
+    const predictWebcam = async () => {
         let startTimeMs = performance.now();
         canvasCtx = canvasElement.current.getContext("2d");
         drawingUtils = new DrawingUtils(canvasCtx);
@@ -120,119 +118,124 @@ function CounterPage() {
                     drawingUtils.drawLandmarks(landmark, {radius: (data) => DrawingUtils.lerp(data.from.z, -0.15, 0.1, 5, 1)});
                     drawingUtils.drawConnectors(landmark, PoseLandmarker.POSE_CONNECTIONS);
                 }
+                countScore()
             });
         }
 
         // Call this function again to keep predicting when the browser is ready
         if (predictionsRunning === true) {
-            let landmarks = landmarkerRef.current.landmarks[0]
-
-            // Code to track and count LEFT arm movement
-            if (landmarks && landmarks[11].visibility > 0.9 && landmarks[13].visibility > 0.9 && landmarks[19].visibility > 0.9) {
-                let lShoulderY = landmarks[11].y
-                let lElbowY = landmarks[13].y
-                let lHandY = landmarks[19].y
-
-                if (modelRef.current === "KNN") {
-                    let prediction = machineRef.current.classify([lShoulderY, lElbowY, lHandY])
-                    console.log(`Left is ${prediction}`)
-
-                    if (prediction === "up") {
-                        if (lDown) {
-                            setLScore((lScore) => lScore + 1)
-                            lDown = false
-                        }
-                    }
-
-                    if (prediction === "down") {
-                        lDown = true
-                    }
-
-                } else if (modelRef.current === "NN") {
-                    // eslint-disable-next-line react-hooks/rules-of-hooks
-                    useNN(lShoulderY, lElbowY, lHandY).then(r => nnResLeft = r)
-
-                    console.log(`NN Left is ${nnResLeft}`)
-
-                    if (nnResLeft === "up") {
-                        if (lDown) {
-                            setLScore((lScore) => lScore + 1)
-                            lDown = false
-                        }
-                    }
-
-                    if (nnResLeft === "down") {
-                        lDown = true
-                    }
-
-                } else {
-                    if (lHandY < lShoulderY) {
-                        if (lDown) {
-                            setLScore((lScore) => lScore + 1)
-                            lDown = false
-                        }
-                    }
-
-                    if (lHandY > lElbowY) {
-                        lDown = true
-                    }
-                }
-            }
-
-            // Code to track and count RIGHT arm movement
-            if (landmarks && landmarks[12].visibility > 0.9 && landmarks[14].visibility > 0.9 && landmarks[20].visibility > 0.9) {
-                let rShoulderY = landmarks[12].y
-                let rElbowY = landmarks[14].y
-                let rHandY = landmarks[20].y
-
-                if (modelRef.current === "KNN") {
-                    let prediction = machineRef.current.classify([rShoulderY, rElbowY, rHandY])
-                    console.log(`Right is ${prediction}`)
-
-                    if (prediction === "up") {
-                        if (rDown) {
-                            setRScore((rScore) => rScore + 1)
-                            rDown = false
-                        }
-                    }
-
-                    if (prediction === "down") {
-                        rDown = true
-                    }
-
-                } else if (modelRef.current === "NN") {
-                    // eslint-disable-next-line react-hooks/rules-of-hooks
-                    useNN(rShoulderY, rElbowY, rHandY).then(r => nnResRight = r)
-
-                    console.log(`NN Right is ${nnResRight}`)
-
-                    if (nnResRight === "up") {
-                        if (rDown) {
-                            setRScore((rScore) => rScore + 1)
-                            rDown = false
-                        }
-                    }
-
-                    if (nnResRight === "down") {
-                        rDown = true
-                    }
-
-                } else {
-                    if (rHandY < rShoulderY) {
-                        if (rDown) {
-                            setRScore((rScore) => rScore + 1)
-                            rDown = false
-                        }
-                    }
-
-                    if (rHandY > rElbowY) {
-                        rDown = true
-                    }
-                }
-            }
-
             // Activate predictWebcam every frame
             window.requestAnimationFrame(predictWebcam);
+        }
+    }
+
+    const countScore = () => {
+        let landmarks = landmarkerRef.current.landmarks[0]
+
+        // Code to track and count LEFT arm movement
+        if (landmarks && landmarks[11].visibility > 0.9 && landmarks[13].visibility > 0.9 && landmarks[19].visibility > 0.9) {
+            let lShoulderY = landmarks[11].y
+            let lElbowY = landmarks[13].y
+            let lHandY = landmarks[19].y
+
+            if (modelRef.current === "KNN") {
+                let prediction = machineRef.current.classify([lShoulderY, lElbowY, lHandY])
+                console.log(`KNN Left is ${prediction}`)
+
+                if (prediction === "up") {
+                    if (lDown) {
+                        setLScore((lScore) => lScore + 1)
+                        lDown = false
+                    }
+                }
+
+                if (prediction === "down") {
+                    lDown = true
+                }
+
+            } else if (modelRef.current === "NN") {
+                // eslint-disable-next-line react-hooks/rules-of-hooks
+                useNN(lShoulderY, lElbowY, lHandY).then(r => nnResLeft = r)
+                console.log(`NN Left is ${nnResLeft}`)
+
+                if (nnResLeft === "up") {
+                    if (lDown) {
+                        setLScore((lScore) => lScore + 1)
+                        lDown = false
+                    }
+                }
+
+                if (nnResLeft === "down") {
+                    lDown = true
+                }
+
+            } else {
+                if (lHandY < lShoulderY) {
+                    if (lDown) {
+                        console.log("Logic Left is up")
+                        setLScore((lScore) => lScore + 1)
+                        lDown = false
+                    }
+                }
+
+                if (lHandY > lElbowY) {
+                    console.log("Logic Left is down")
+                    lDown = true
+                }
+            }
+        }
+
+        // Code to track and count RIGHT arm movement
+        if (landmarks && landmarks[12].visibility > 0.9 && landmarks[14].visibility > 0.9 && landmarks[20].visibility > 0.9) {
+            let rShoulderY = landmarks[12].y
+            let rElbowY = landmarks[14].y
+            let rHandY = landmarks[20].y
+
+            if (modelRef.current === "KNN") {
+                let prediction = machineRef.current.classify([rShoulderY, rElbowY, rHandY])
+                console.log(`KNN Right is ${prediction}`)
+
+                if (prediction === "up") {
+                    if (rDown) {
+                        setRScore((rScore) => rScore + 1)
+                        rDown = false
+                    }
+                }
+
+                if (prediction === "down") {
+                    rDown = true
+                }
+
+            } else if (modelRef.current === "NN") {
+                // eslint-disable-next-line react-hooks/rules-of-hooks
+                useNN(rShoulderY, rElbowY, rHandY).then(r => nnResRight = r)
+                console.log(`NN Right is ${nnResRight}`)
+
+                if (nnResRight === "up") {
+                    if (rDown) {
+                        setRScore((rScore) => rScore + 1)
+                        rDown = false
+                    }
+                }
+
+                if (nnResRight === "down") {
+                    rDown = true
+                }
+
+            } else {
+                if (rHandY < rShoulderY) {
+                    if (rDown) {
+                        console.log("Logic Right is up")
+                        setRScore((rScore) => rScore + 1)
+                        rDown = false
+                    }
+                }
+
+                if (rHandY > rElbowY) {
+                    console.log("Logic Right is down")
+                    rDown = true
+                }
+            }
         }
     }
 
@@ -245,12 +248,12 @@ function CounterPage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#ff8c00] to-[#ffe312] flex flex-col lg:items-center lg:justify-center gap-4 text-white">
-            {/*<button className="bg-purple-400 hover:bg-purple-500 rounded p-2 absolute top-2 left-2" onClick={() => {*/}
-            {/*    getDataPoints(landmarkerRef.current)*/}
-            {/*}}>Get Data*/}
-            {/*</button>*/}
-            {/*<button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-20 left-2" onClick={startTraining}>Train NN</button>*/}
-            {/*<button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-40 left-2" onClick={saveModel}>Save NN</button>*/}
+            <button className="bg-purple-400 hover:bg-purple-500 rounded p-2 absolute top-2 left-2" onClick={() => {
+                getDataPoints(landmarkerRef.current)
+            }}>Get Data
+            </button>
+            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-20 left-2" onClick={startTraining}>Train NN</button>
+            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-40 left-2" onClick={saveModel}>Save NN</button>
 
             <h1 className="text-5xl lg:text-7xl font-bold text-center">FLEX COUNTER</h1>
 

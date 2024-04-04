@@ -15,7 +15,7 @@ function ScoreComponent({lScore, rScore, setRScore, setLScore}) {
     }, []);
 
     // Function to save total & record into localstorage
-    function saveScore() {
+    const saveScore = () => {
         const newLTotal = lTotal + lScore
         const newRTotal = rTotal + rScore
 
@@ -39,14 +39,14 @@ function ScoreComponent({lScore, rScore, setRScore, setLScore}) {
         setRScore(0)
     }
 
-    function resetTotal() {
+    const resetTotal = () => {
         setLTotal(0)
         setRTotal(0)
         localStorage.setItem("lTotal", 0)
         localStorage.setItem("rTotal", 0)
     }
 
-    function resetRecord() {
+    const resetRecord = () => {
         setLRecord(0)
         setRRecord(0)
         localStorage.setItem("lRecord", 0)
