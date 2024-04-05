@@ -7,6 +7,7 @@ import {trainKnn} from "./trainKNN.js";
 import {saveModel, startTraining} from "./trainNN.js";
 import {useNN} from "./useNN.js";
 import {getDataPoints} from "./getDataPoints.js";
+import {testLogic} from "./calcAccuracy.js";
 
 function CounterPage() {
     const videoElement = useRef(null)
@@ -141,7 +142,7 @@ function CounterPage() {
 
             if (modelRef.current === "KNN") {
                 let prediction = machineRef.current.classify([lShoulderY, lElbowY, lHandY])
-                console.log(`KNN Left is ${prediction}`)
+                // console.log(`KNN Left is ${prediction}`)
 
                 if (prediction === "up") {
                     if (lDown) {
@@ -157,7 +158,7 @@ function CounterPage() {
             } else if (modelRef.current === "NN") {
                 // eslint-disable-next-line react-hooks/rules-of-hooks
                 useNN(lShoulderY, lElbowY, lHandY).then(r => nnResLeft = r[0].label)
-                console.log(`NN Left is ${nnResLeft}`)
+                // console.log(`NN Left is ${nnResLeft}`)
 
                 if (nnResLeft === "up") {
                     if (lDown) {
@@ -173,14 +174,14 @@ function CounterPage() {
             } else {
                 if (lHandY < lShoulderY) {
                     if (lDown) {
-                        console.log("Logic Left is up")
+                        // console.log("Logic Left is up")
                         setLScore((lScore) => lScore + 1)
                         lDown = false
                     }
                 }
 
                 if (lHandY > lElbowY) {
-                    console.log("Logic Left is down")
+                    // console.log("Logic Left is down")
                     lDown = true
                 }
             }
@@ -247,6 +248,10 @@ function CounterPage() {
         setActiveModel(models[nextIndex]);
     }
 
+    function calcAccuracy() {
+        testLogic()
+    }
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#ff8c00] to-[#ffe312] flex flex-col lg:items-center lg:justify-center gap-4 text-white">
             <button className="bg-purple-400 hover:bg-purple-500 rounded p-2 absolute top-2 left-2" onClick={() => {
@@ -255,6 +260,7 @@ function CounterPage() {
             </button>
             <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-20 left-2" onClick={startTraining}>Train NN</button>
             <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-40 left-2" onClick={saveModel}>Save NN</button>
+            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-40 left-2" onClick={calcAccuracy}>Calc Accuracy</button>
 
             <h1 className="text-5xl lg:text-7xl font-bold text-center">FLEX COUNTER</h1>
 

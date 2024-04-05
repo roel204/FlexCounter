@@ -30,7 +30,7 @@ export async function startTraining() {
     // Try-catch to await
     try {
         // Get the data that is being trained on
-        const response = await fetch('src/data.json');
+        const response = await fetch('src/trainData.json');
         const data = await response.json();
 
         // Check if data is loaded successfully

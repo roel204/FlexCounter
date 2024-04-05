@@ -10,8 +10,9 @@ export async function getDataPoints(poseLandmarker) {
     data = []
 
     for (let label of ["up", "down", "other"]) {
-        for (let i = 0; i < 30; i++) {
-            await delay(2000)
+        await delay(2000)
+        for (let i = 0; i < 20; i++) {
+            await delay(1000)
 
             if (poseLandmarker.landmarks[0]) {
                 let lShoulder = poseLandmarker.landmarks[0][11];
