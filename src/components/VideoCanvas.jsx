@@ -8,8 +8,8 @@ function VideoCanvas({videoHeight, videoWidth, videoElement, canvasElement}) {
             const width = window.innerWidth <= 1024 ? window.innerWidth : 854;
             videoHeight.current = `${Math.floor(width / (16 / 9))}px`;
             videoWidth.current = `${width}px`;
-            console.log(videoHeight.current)
-            console.log(videoWidth.current)
+            // console.log(videoHeight.current)
+            // console.log(videoWidth.current)
         };
 
         window.addEventListener("resize", handleResize);

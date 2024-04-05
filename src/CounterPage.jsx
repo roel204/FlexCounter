@@ -1,13 +1,13 @@
 import {useEffect, useRef, useState} from 'react';
 import {DrawingUtils, FilesetResolver, PoseLandmarker,} from '@mediapipe/tasks-vision'
-import ScoreComponent from "./ScoreComponent.jsx";
-import VideoCanvas from "./VideoCanvas.jsx";
-import kNear from "./knear.js";
-import {trainKnn} from "./trainKNN.js";
-import {saveModel, startTraining} from "./trainNN.js";
-import {useNN} from "./useNN.js";
-import {getDataPoints} from "./getDataPoints.js";
-import {testKNN, testLogic, testNN} from "./calcAccuracy.js";
+import ScoreComponent from "./components/ScoreComponent.jsx";
+import VideoCanvas from "./components/VideoCanvas.jsx";
+import kNear from "./jsFiles/knear.js";
+import {trainKnn} from "./jsFiles/trainKNN.js";
+import {saveModel, startTraining} from "./jsFiles/trainNN.js";
+import {useNN} from "./jsFiles/useNN.js";
+import {getDataPoints} from "./jsFiles/getDataPoints.js";
+import {testKNN, testLogic, testNN} from "./jsFiles/calcAccuracy.js";
 
 function CounterPage() {
     const videoElement = useRef(null)
@@ -15,7 +15,7 @@ function CounterPage() {
     const enableWebcamButton = useRef(null)
     let canvasCtx = useRef(null)
     let drawingUtils = useRef(null)
-    const landmarkerRef = useRef(null)
+    const poseLandmarkerRef = useRef(null)
 
     let predictionsRunning = false;
     let lastVideoTime = -1;
@@ -56,19 +56,23 @@ function CounterPage() {
                 createPoseLandmarker();
             } else {
                 console.warn("getUserMedia() is not supported by your browser");
+                window.alert("Sorry, this app is not supported by your browser")
             }
         }
 
         // Create PoseLandmarker
         const createPoseLandmarker = async () => {
             const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm");
-            landmarkerRef.current = await PoseLandmarker.createFromOptions(vision, {
+            poseLandmarkerRef.current = await PoseLandmarker.createFromOptions(vision, {
                 baseOptions: {
                     modelAssetPath: `https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task`,
                     delegate: "GPU"
                 },
                 runningMode: "VIDEO",
-                numPoses: 1
+                numPoses: 1,
+                min_pose_detection_confidence: 0.8,
+                min_pose_presence_confidence: 0.8,
+                min_tracking_confidence: 0.8
             })
             setDisableButton(false)
             enableWebcamButton.current.innerText = "Enable Webcam"
@@ -80,7 +84,7 @@ function CounterPage() {
     // Enable the live webcam view and start detection or toggle predictions
     const enableCam = () => {
 
-        if (!landmarkerRef.current) {
+        if (!poseLandmarkerRef.current) {
             window.alert("Wait! poseLandmaker not loaded yet.");
             return;
         }
@@ -102,6 +106,7 @@ function CounterPage() {
 
         }).catch((error) => {
             console.error("Error accessing webcam:", error);
+            window.alert("Error accessing webcam.")
         });
     }
 
@@ -112,7 +117,7 @@ function CounterPage() {
 
         if (lastVideoTime !== videoElement.current.currentTime) {
             lastVideoTime = videoElement.current.currentTime;
-            landmarkerRef.current.detectForVideo(videoElement.current, startTimeMs, (result) => {
+            poseLandmarkerRef.current.detectForVideo(videoElement.current, startTimeMs, (result) => {
 
                 // Draw landmarkers in canvas
                 canvasCtx.clearRect(0, 0, canvasElement.current.width, canvasElement.current.height);
@@ -132,7 +137,7 @@ function CounterPage() {
     }
 
     const countScore = () => {
-        let landmarks = landmarkerRef.current.landmarks[0]
+        let landmarks = poseLandmarkerRef.current.landmarks[0]
 
         // Code to track and count LEFT arm movement
         if (landmarks && landmarks[11].visibility > 0.9 && landmarks[13].visibility > 0.9 && landmarks[19].visibility > 0.9) {
@@ -210,7 +215,7 @@ function CounterPage() {
 
             } else if (modelRef.current === "NN") {
                 // eslint-disable-next-line react-hooks/rules-of-hooks
-                useNN(rShoulderY, rElbowY, rHandY).then(r => nnResRight = r)
+                useNN(rShoulderY, rElbowY, rHandY).then(r => nnResRight = r[0].label)
                 // console.log(`NN Right is ${nnResRight}`)
 
                 if (nnResRight === "up") {
@@ -257,7 +262,7 @@ function CounterPage() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#ff8c00] to-[#ffe312] flex flex-col lg:items-center lg:justify-center gap-4 text-white">
             <button className="bg-purple-400 hover:bg-purple-500 rounded p-2 absolute top-2 left-2" onClick={() => {
-                getDataPoints(landmarkerRef.current)
+                getDataPoints(poseLandmarkerRef.current)
             }}>Get Data
             </button>
             <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-20 left-2" onClick={startTraining}>Train NN</button>

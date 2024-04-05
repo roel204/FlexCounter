@@ -21,7 +21,7 @@ export async function testLogic() {
     logicOther = 0
     try {
         // Get the data that is being tested on
-        const response = await fetch('src/testData.json');
+        const response = await fetch('src/data/testData.json');
         const data = await response.json();
 
         for (const point of data) {
@@ -54,7 +54,7 @@ export async function testKNN() {
     knnOther = 0
     try {
         // Get the data that is being tested on
-        const response = await fetch('src/testData.json');
+        const response = await fetch('src/data/testData.json');
         const data = await response.json();
 
         const machine = new kNear(3);
@@ -93,17 +93,13 @@ export async function testNN() {
     nnOther = 0
     try {
         // Get the data that is being tested on
-        const response = await fetch('src/testData.json');
+        const response = await fetch('src/data/testData.json');
         const data = await response.json();
 
         for (const point of data) {
             let res = ""
             // eslint-disable-next-line react-hooks/rules-of-hooks
             await useNN(point.pose[0], point.pose[1], point.pose[2]).then(r => res = r[0].label)
-
-
-            // I NEED TO CHECK IF THE ANSWER IN THE TEST DATA IS ALSO THE SAME
-
 
             if (res === "up" && point.label === "up") {
                 nnUp++
