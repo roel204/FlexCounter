@@ -25,17 +25,22 @@ export async function testLogic() {
         const data = await response.json();
 
         for (const point of data) {
-            if (point.pose[2] < point.pose[0]) {
+            if (point.pose[2] < point.pose[0] && point.label === "up") {
                 logicUp++
-            } else if (point.pose[2] > point.pose[1]) {
+            }
+
+            if (point.pose[2] > point.pose[1] && point.label === "down") {
                 logicDown++
-            } else {
+            }
+
+            if (point.pose[2] > point.pose[0] && point.pose[2] < point.pose[1] && point.label === "other") {
                 logicOther++
             }
         }
         console.log("Logic Up", logicUp)
         console.log("Logic Down", logicDown)
         console.log("Logic Other", logicOther)
+        console.log("Logic Accuracy %:",((logicUp + logicDown + logicOther) / 60) * 100)
 
     } catch (error) {
         console.error(error)
@@ -58,15 +63,15 @@ export async function testKNN() {
         for (const point of data) {
             let prediction = machine.classify([point.pose[0], point.pose[1], point.pose[2]])
 
-            if (prediction === "up") {
+            if (prediction === "up" && point.label === "up") {
                 knnUp++
             }
 
-            if (prediction === "down") {
+            if (prediction === "down" && point.label === "down") {
                 knnDown++
             }
 
-            if (prediction === "other") {
+            if (prediction === "other" && point.label === "other") {
                 knnOther++
             }
 
@@ -74,6 +79,7 @@ export async function testKNN() {
         console.log("KNN Up", knnUp)
         console.log("KNN Down", knnDown)
         console.log("KNN Other", knnOther)
+        console.log("KNN Accuracy %:",((knnUp + knnDown + knnOther) / 60) * 100)
 
     } catch (error) {
         console.error(error)
@@ -95,15 +101,19 @@ export async function testNN() {
             // eslint-disable-next-line react-hooks/rules-of-hooks
             await useNN(point.pose[0], point.pose[1], point.pose[2]).then(r => res = r[0].label)
 
-            if (res === "up") {
+
+            // I NEED TO CHECK IF THE ANSWER IN THE TEST DATA IS ALSO THE SAME
+
+
+            if (res === "up" && point.label === "up") {
                 nnUp++
             }
 
-            if (res === "down") {
+            if (res === "down" && point.label === "down") {
                 nnDown++
             }
 
-            if (res === "other") {
+            if (res === "other" && point.label === "other") {
                 nnOther++
             }
 
@@ -111,6 +121,7 @@ export async function testNN() {
         console.log("NN Up", nnUp)
         console.log("NN Down", nnDown)
         console.log("NN Other", nnOther)
+        console.log("NN Accuracy %:",((nnUp + nnDown + nnOther) / 60) * 100)
 
     } catch (error) {
         console.error(error)
