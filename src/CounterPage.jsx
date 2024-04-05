@@ -7,7 +7,7 @@ import {trainKnn} from "./trainKNN.js";
 import {saveModel, startTraining} from "./trainNN.js";
 import {useNN} from "./useNN.js";
 import {getDataPoints} from "./getDataPoints.js";
-import {testLogic} from "./calcAccuracy.js";
+import {testKNN, testLogic, testNN} from "./calcAccuracy.js";
 
 function CounterPage() {
     const videoElement = useRef(null)
@@ -250,6 +250,8 @@ function CounterPage() {
 
     function calcAccuracy() {
         testLogic()
+        testKNN()
+        testNN()
     }
 
     return (
@@ -260,7 +262,7 @@ function CounterPage() {
             </button>
             <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-20 left-2" onClick={startTraining}>Train NN</button>
             <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-40 left-2" onClick={saveModel}>Save NN</button>
-            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-40 left-2" onClick={calcAccuracy}>Calc Accuracy</button>
+            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-60 left-2" onClick={calcAccuracy}>Calc Accuracy</button>
 
             <h1 className="text-5xl lg:text-7xl font-bold text-center">FLEX COUNTER</h1>
 
