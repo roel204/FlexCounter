@@ -2,12 +2,11 @@ import {useEffect, useRef, useState} from 'react';
 import {DrawingUtils, FilesetResolver, PoseLandmarker,} from '@mediapipe/tasks-vision'
 import ScoreComponent from "./components/ScoreComponent.jsx";
 import VideoCanvas from "./components/VideoCanvas.jsx";
-import kNear from "./jsFiles/knear.js";
-import {trainKnn} from "./jsFiles/trainKNN.js";
 import {saveModel, startTraining} from "./jsFiles/trainNN.js";
 import {useNN} from "./jsFiles/useNN.js";
 import {getDataPoints} from "./jsFiles/getDataPoints.js";
 import {testKNN, testLogic, testNN} from "./jsFiles/calcAccuracy.js";
+import {useKNN} from "./jsFiles/KNN.js";
 
 function CounterPage() {
     const videoElement = useRef(null)
@@ -24,8 +23,6 @@ function CounterPage() {
 
     let lDown = false
     let rDown = false
-    let nnResLeft = ""
-    let nnResRight = ""
     const [lScore, setLScore] = useState(0)
     const [rScore, setRScore] = useState(0)
 
@@ -37,12 +34,6 @@ function CounterPage() {
     useEffect(() => {
         modelRef.current = activeModel
     }, [activeModel]);
-
-    // Create machineRef and train the KNN model
-    const machineRef = useRef(new kNear(3));
-    useEffect(() => {
-        trainKnn(machineRef.current);
-    }, []);
 
     // Setup Camera and PoseLandmarker
     useEffect(() => {
@@ -136,7 +127,7 @@ function CounterPage() {
         }
     }
 
-    const countScore = () => {
+    const countScore = async () => {
         let landmarks = poseLandmarkerRef.current.landmarks[0]
 
         // Code to track and count LEFT arm movement
@@ -146,7 +137,7 @@ function CounterPage() {
             let lHandY = landmarks[19].y
 
             if (modelRef.current === "KNN") {
-                let prediction = machineRef.current.classify([lShoulderY, lElbowY, lHandY])
+                let prediction = await useKNN(lShoulderY, lElbowY, lHandY)
                 // console.log(`KNN Left is ${prediction}`)
 
                 if (prediction === "up") {
@@ -161,18 +152,17 @@ function CounterPage() {
                 }
 
             } else if (modelRef.current === "NN") {
-                // eslint-disable-next-line react-hooks/rules-of-hooks
-                useNN(lShoulderY, lElbowY, lHandY).then(r => nnResLeft = r[0].label)
-                // console.log(`NN Left is ${nnResLeft}`)
+                let prediction = await useNN(lShoulderY, lElbowY, lHandY)
+                // console.log(`NN Left is ${prediction}`)
 
-                if (nnResLeft === "up") {
+                if (prediction === "up") {
                     if (lDown) {
                         setLScore((lScore) => lScore + 1)
                         lDown = false
                     }
                 }
 
-                if (nnResLeft === "down") {
+                if (prediction === "down") {
                     lDown = true
                 }
 
@@ -199,7 +189,7 @@ function CounterPage() {
             let rHandY = landmarks[20].y
 
             if (modelRef.current === "KNN") {
-                let prediction = machineRef.current.classify([rShoulderY, rElbowY, rHandY])
+                let prediction = await useKNN(rShoulderY, rElbowY, rHandY)
                 // console.log(`KNN Right is ${prediction}`)
 
                 if (prediction === "up") {
@@ -214,18 +204,17 @@ function CounterPage() {
                 }
 
             } else if (modelRef.current === "NN") {
-                // eslint-disable-next-line react-hooks/rules-of-hooks
-                useNN(rShoulderY, rElbowY, rHandY).then(r => nnResRight = r[0].label)
+                let prediction = await useNN(rShoulderY, rElbowY, rHandY)
                 // console.log(`NN Right is ${nnResRight}`)
 
-                if (nnResRight === "up") {
+                if (prediction === "up") {
                     if (rDown) {
                         setRScore((rScore) => rScore + 1)
                         rDown = false
                     }
                 }
 
-                if (nnResRight === "down") {
+                if (prediction === "down") {
                     rDown = true
                 }
 

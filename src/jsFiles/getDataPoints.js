@@ -1,5 +1,3 @@
-let data = []
-
 const delay = async (ms) => {
     return new Promise((resolve) =>
         setTimeout(resolve, ms));
@@ -7,7 +5,7 @@ const delay = async (ms) => {
 
 // Get datapoints in the console for when training model
 export async function getDataPoints(poseLandmarker) {
-    data = []
+    let data = []
 
     for (let label of ["up", "down", "other"]) {
         await delay(2000)

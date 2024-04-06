@@ -1,29 +1,16 @@
-import kNear from "./knear.js";
-import {trainKnn} from "./trainKNN.js";
+import {useKNN} from "./KNN.js";
 import {useNN} from "./useNN.js";
 
-let logicUp = 0
-let logicDown = 0
-let logicOther = 0
-
-let knnUp = 0
-let knnDown = 0
-let knnOther = 0
-
-let nnUp = 0
-let nnDown = 0
-let nnOther = 0
-
 export async function testLogic() {
-    console.log("Start testLogic")
-    logicUp = 0
-    logicDown = 0
-    logicOther = 0
+    let logicUp = 0
+    let logicDown = 0
+    let logicOther = 0
     try {
         // Get the data that is being tested on
         const response = await fetch('src/data/testData.json');
         const data = await response.json();
 
+        // Use the logic calculation on each test datapoint
         for (const point of data) {
             if (point.pose[2] < point.pose[0] && point.label === "up") {
                 logicUp++
@@ -48,20 +35,18 @@ export async function testLogic() {
 }
 
 export async function testKNN() {
-    console.log("Start testKNN")
-    knnUp = 0
-    knnDown = 0
-    knnOther = 0
+    let knnUp = 0
+    let knnDown = 0
+    let knnOther = 0
     try {
         // Get the data that is being tested on
         const response = await fetch('src/data/testData.json');
         const data = await response.json();
 
-        const machine = new kNear(3);
-        await trainKnn(machine);
-
+        // Use the KNN model on each test datapoint
         for (const point of data) {
-            let prediction = machine.classify([point.pose[0], point.pose[1], point.pose[2]])
+            let prediction = ""
+            useKNN(point.pose[0], point.pose[1], point.pose[2]).then(r => prediction = r)
 
             if (prediction === "up" && point.label === "up") {
                 knnUp++
@@ -87,15 +72,15 @@ export async function testKNN() {
 }
 
 export async function testNN() {
-    console.log("Start testNN")
-    nnUp = 0
-    nnDown = 0
-    nnOther = 0
+    let nnUp = 0
+    let nnDown = 0
+    let nnOther = 0
     try {
         // Get the data that is being tested on
         const response = await fetch('src/data/testData.json');
         const data = await response.json();
 
+        // Use the NN model on each test datapoint
         for (const point of data) {
             let res = ""
             // eslint-disable-next-line react-hooks/rules-of-hooks
