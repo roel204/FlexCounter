@@ -1,7 +1,13 @@
 import {useKNN} from "./KNN.js";
 import {useNN} from "./useNN.js";
 
-export async function testLogic() {
+export function calcAccuracy() {
+    testLogic()
+    testKNN()
+    testNN()
+}
+
+async function testLogic() {
     let logicUp = 0
     let logicDown = 0
     let logicOther = 0
@@ -27,14 +33,14 @@ export async function testLogic() {
         console.log("Logic Up", logicUp)
         console.log("Logic Down", logicDown)
         console.log("Logic Other", logicOther)
-        console.log("Logic Accuracy %:",((logicUp + logicDown + logicOther) / 60) * 100)
+        console.log("Logic Accuracy %:", ((logicUp + logicDown + logicOther) / 60) * 100)
 
     } catch (error) {
         console.error(error)
     }
 }
 
-export async function testKNN() {
+async function testKNN() {
     let knnUp = 0
     let knnDown = 0
     let knnOther = 0
@@ -45,8 +51,7 @@ export async function testKNN() {
 
         // Use the KNN model on each test datapoint
         for (const point of data) {
-            let prediction = ""
-            useKNN(point.pose[0], point.pose[1], point.pose[2]).then(r => prediction = r)
+            let prediction = await useKNN(point.pose[0], point.pose[1], point.pose[2])
 
             if (prediction === "up" && point.label === "up") {
                 knnUp++
@@ -64,14 +69,14 @@ export async function testKNN() {
         console.log("KNN Up", knnUp)
         console.log("KNN Down", knnDown)
         console.log("KNN Other", knnOther)
-        console.log("KNN Accuracy %:",((knnUp + knnDown + knnOther) / 60) * 100)
+        console.log("KNN Accuracy %:", ((knnUp + knnDown + knnOther) / 60) * 100)
 
     } catch (error) {
         console.error(error)
     }
 }
 
-export async function testNN() {
+async function testNN() {
     let nnUp = 0
     let nnDown = 0
     let nnOther = 0
@@ -82,19 +87,17 @@ export async function testNN() {
 
         // Use the NN model on each test datapoint
         for (const point of data) {
-            let res = ""
-            // eslint-disable-next-line react-hooks/rules-of-hooks
-            await useNN(point.pose[0], point.pose[1], point.pose[2]).then(r => res = r[0].label)
+            let prediction = await useNN(point.pose[0], point.pose[1], point.pose[2])
 
-            if (res === "up" && point.label === "up") {
+            if (prediction === "up" && point.label === "up") {
                 nnUp++
             }
 
-            if (res === "down" && point.label === "down") {
+            if (prediction === "down" && point.label === "down") {
                 nnDown++
             }
 
-            if (res === "other" && point.label === "other") {
+            if (prediction === "other" && point.label === "other") {
                 nnOther++
             }
 
@@ -102,7 +105,7 @@ export async function testNN() {
         console.log("NN Up", nnUp)
         console.log("NN Down", nnDown)
         console.log("NN Other", nnOther)
-        console.log("NN Accuracy %:",((nnUp + nnDown + nnOther) / 60) * 100)
+        console.log("NN Accuracy %:", ((nnUp + nnDown + nnOther) / 60) * 100)
 
     } catch (error) {
         console.error(error)

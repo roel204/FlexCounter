@@ -2,6 +2,7 @@
 const nn = ml5.neuralNetwork({
     task: 'classification',
     debug: true,
+    // Create multiple layers
     layers: [
         {
             type: 'dense',
@@ -26,8 +27,8 @@ const nn = ml5.neuralNetwork({
 })
 
 // Start the training process
-export async function startTraining() {
-    // Try-catch to await
+export async function trainNN() {
+    // Try-catch to use await
     try {
         // Get the data that is being trained on
         const response = await fetch('src/data/trainData.json');
@@ -38,10 +39,12 @@ export async function startTraining() {
             console.error('Failed to load training data');
         }
 
+        // Add each data point from the json file
         for (const point of data) {
             nn.addData(point.pose, {label: point.label});
         }
 
+        // Start the training
         nn.normalizeData();
         nn.train({
             epochs: 250,
@@ -64,7 +67,7 @@ async function finishedTraining() {
 }
 
 // Export the trained model
-export async function saveModel() {
+export async function saveNN() {
     nn.save("model", () => console.log("model was saved!"))
 }
 

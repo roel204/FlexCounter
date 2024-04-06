@@ -2,10 +2,10 @@ import {useEffect, useRef, useState} from 'react';
 import {DrawingUtils, FilesetResolver, PoseLandmarker,} from '@mediapipe/tasks-vision'
 import ScoreComponent from "./components/ScoreComponent.jsx";
 import VideoCanvas from "./components/VideoCanvas.jsx";
-import {saveModel, startTraining} from "./jsFiles/trainNN.js";
+import {saveNN, trainNN} from "./jsFiles/trainNN.js";
 import {useNN} from "./jsFiles/useNN.js";
 import {getDataPoints} from "./jsFiles/getDataPoints.js";
-import {testKNN, testLogic, testNN} from "./jsFiles/calcAccuracy.js";
+import {calcAccuracy} from "./jsFiles/calcAccuracy.js";
 import {useKNN} from "./jsFiles/KNN.js";
 
 function CounterPage() {
@@ -235,17 +235,12 @@ function CounterPage() {
         }
     }
 
+    // Function to switch the active model
     function switchModel() {
         const models = ["Logic", "KNN", "NN"];
         const currentIndex = models.indexOf(activeModel);
         const nextIndex = (currentIndex + 1) % models.length;
         setActiveModel(models[nextIndex]);
-    }
-
-    function calcAccuracy() {
-        testLogic()
-        testKNN()
-        testNN()
     }
 
     return (
@@ -254,8 +249,8 @@ function CounterPage() {
                 getDataPoints(poseLandmarkerRef.current)
             }}>Get Data
             </button>
-            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-20 left-2" onClick={startTraining}>Train NN</button>
-            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-40 left-2" onClick={saveModel}>Save NN</button>
+            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-20 left-2" onClick={trainNN}>Train NN</button>
+            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-40 left-2" onClick={saveNN}>Save NN</button>
             <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-60 left-2" onClick={calcAccuracy}>Calc Accuracy</button>
 
             <h1 className="text-5xl lg:text-7xl font-bold text-center">FLEX COUNTER</h1>

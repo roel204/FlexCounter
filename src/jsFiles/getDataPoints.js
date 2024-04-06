@@ -3,7 +3,7 @@ const delay = async (ms) => {
         setTimeout(resolve, ms));
 };
 
-// Get datapoints in the console for when training model
+// Get datapoints in the console
 export async function getDataPoints(poseLandmarker) {
     let data = []
 
@@ -24,11 +24,11 @@ export async function getDataPoints(poseLandmarker) {
                     });
                     console.log("Point logged:", i, label)
                 } else {
-                    console.log("Points not visible enough!")
+                    console.log("Points not visible enough! (skipped)")
                 }
             }
         }
     }
-    // Save the data
+    // Show the data in the console so it can be copied
     console.log(data)
 }
