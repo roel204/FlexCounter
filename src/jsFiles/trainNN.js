@@ -31,7 +31,7 @@ export async function trainNN() {
     // Try-catch to use await
     try {
         // Get the data that is being trained on
-        const response = await fetch('src/data/trainData.json');
+        const response = await fetch('data/trainData.json');
         const data = await response.json();
 
         // Check if data is loaded successfully

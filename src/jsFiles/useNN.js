@@ -3,9 +3,9 @@ const nn = ml5.neuralNetwork({task: 'classification', debug: true})
 
 // Load the model
 const modelDetails = {
-    model: 'public/model/model.json',
-    metadata: 'public/model/model_meta.json',
-    weights: 'public/model/model.weights.bin'
+    model: 'model/model.json',
+    metadata: 'model/model_meta.json',
+    weights: 'model/model.weights.bin'
 }
 
 nn.load(modelDetails, () => console.log("NN Model has been loaded"))

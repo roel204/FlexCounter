@@ -13,7 +13,7 @@ async function testLogic() {
     let logicOther = 0
     try {
         // Get the data that is being tested on
-        const response = await fetch('src/data/testData.json');
+        const response = await fetch('data/testData.json');
         const data = await response.json();
 
         // Use the logic calculation on each test datapoint
@@ -46,7 +46,7 @@ async function testKNN() {
     let knnOther = 0
     try {
         // Get the data that is being tested on
-        const response = await fetch('src/data/testData.json');
+        const response = await fetch('data/testData.json');
         const data = await response.json();
 
         // Use the KNN model on each test datapoint
@@ -82,7 +82,7 @@ async function testNN() {
     let nnOther = 0
     try {
         // Get the data that is being tested on
-        const response = await fetch('src/data/testData.json');
+        const response = await fetch('data/testData.json');
         const data = await response.json();
 
         // Use the NN model on each test datapoint
