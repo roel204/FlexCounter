@@ -18,8 +18,6 @@ function CounterPage() {
 
     let predictionsRunning = false;
     let lastVideoTime = -1;
-    const videoHeight = useRef("480px");
-    const videoWidth = useRef("854px");
 
     let lDown = false
     let rDown = false
@@ -265,7 +263,7 @@ function CounterPage() {
                 <button className="bg-lime-500 hover:bg-lime-600 rounded-lg p-2 w-[70%] transition" disabled={disableButton} ref={enableWebcamButton} onClick={enableCam}>Loading...</button>
             </div>
 
-            <VideoCanvas videoWidth={videoWidth} videoHeight={videoHeight} videoElement={videoElement} canvasElement={canvasElement}/>
+            <VideoCanvas videoElement={videoElement} canvasElement={canvasElement}/>
         </div>
     )
 
