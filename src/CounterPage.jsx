@@ -2,10 +2,10 @@ import {useEffect, useRef, useState} from 'react';
 import {DrawingUtils, FilesetResolver, PoseLandmarker,} from '@mediapipe/tasks-vision'
 import ScoreComponent from "./components/ScoreComponent.jsx";
 import VideoCanvas from "./components/VideoCanvas.jsx";
-import {saveNN, trainNN} from "./jsFiles/trainNN.js";
+// import {saveNN, trainNN} from "./jsFiles/trainNN.js";
 import {useNN} from "./jsFiles/useNN.js";
-import {getDataPoints} from "./jsFiles/getDataPoints.js";
-import {calcAccuracy} from "./jsFiles/calcAccuracy.js";
+// import {getDataPoints} from "./jsFiles/getDataPoints.js";
+// import {calcAccuracy} from "./jsFiles/calcAccuracy.js";
 import {useKNN} from "./jsFiles/KNN.js";
 
 function CounterPage() {
@@ -245,13 +245,15 @@ function CounterPage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#ff8c00] to-[#ffe312] flex flex-col lg:items-center lg:justify-center gap-4 text-white">
-            <button className="bg-purple-400 hover:bg-purple-500 rounded p-2 absolute top-2 left-2" onClick={() => {
-                getDataPoints(poseLandmarkerRef.current)
-            }}>Get Data
-            </button>
-            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-20 left-2" onClick={trainNN}>Train NN</button>
-            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-40 left-2" onClick={saveNN}>Save NN</button>
-            <button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-60 left-2" onClick={calcAccuracy}>Calc Accuracy</button>
+
+            {/*Dev Buttons*/}
+            {/*<button className="bg-purple-400 hover:bg-purple-500 rounded p-2 absolute top-2 left-2" onClick={() => {*/}
+            {/*    getDataPoints(poseLandmarkerRef.current)*/}
+            {/*}}>Get Data*/}
+            {/*</button>*/}
+            {/*<button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-20 left-2" onClick={trainNN}>Train NN</button>*/}
+            {/*<button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-40 left-2" onClick={saveNN}>Save NN</button>*/}
+            {/*<button className="bg-blue-400 hover:bg-blue-500 rounded p-2 absolute top-60 left-2" onClick={calcAccuracy}>Calc Accuracy</button>*/}
 
             <h1 className="text-5xl lg:text-7xl font-bold text-center">FLEX COUNTER</h1>
 
