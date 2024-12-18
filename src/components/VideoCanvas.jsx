@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 function VideoCanvas({ videoElement, canvasElement }) {
     const [videoSize, setVideoSize] = useState({ width: "256px", height: "144px" });
