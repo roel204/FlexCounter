@@ -68,15 +68,15 @@ function ScoreComponent({ lScore, rScore, setRScore, setLScore }) {
                     </svg>
                 </button>
                 <p className="text-2xl lg:text-5xl text-center">Left</p>
-                <p className="text-7xl lg:text-9xl text-center">{lScore}</p>
+                <p className="text-5xl sm:text-7xl lg:text-9xl text-center">{lScore}</p>
             </div>
 
             <div className="flex flex-col justify-between w-[40%] items-center">
 
                 {/* Total */}
-                <div className="relative w-full h-full bg-black/25 rounded-2xl p-4 mb-2">
+                <div className="relative w-full h-full bg-black/25 rounded-2xl p-2 mb-2">
                     <button
-                        className="absolute bottom-4 left-4 inline-flex w-4 h-4 sm:w-6 sm:h-6 lg:w-8 lg:h-8"
+                        className="absolute top-3 left-3 inline-flex w-3 h-3 sm:w-6 sm:h-6"
                         onClick={resetTotal}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" className="fill-orange-200 hover:fill-orange-400">
@@ -89,9 +89,9 @@ function ScoreComponent({ lScore, rScore, setRScore, setLScore }) {
                 </div>
 
                 {/* Record */}
-                <div className="relative w-full h-full bg-black/25 rounded-2xl p-4">
+                <div className="relative w-full h-full bg-black/25 rounded-2xl p-2">
                     <button
-                        className="absolute bottom-4 left-4 inline-flex w-4 h-4 sm:w-6 sm:h-6 lg:w-8 lg:h-8"
+                        className="absolute top-3 left-3 inline-flex w-3 h-3 sm:w-6 sm:h-6"
                         onClick={resetRecord}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" className="fill-orange-200 hover:fill-orange-400">
@@ -107,7 +107,7 @@ function ScoreComponent({ lScore, rScore, setRScore, setLScore }) {
             {/* Right */}
             <div className="w-[30%] bg-black/25 rounded-2xl p-4 text-center">
                 <p className="text-2xl lg:text-5xl">Right</p>
-                <p className="text-7xl lg:text-9xl">{rScore}</p>
+                <p className="text-5xl sm:text-7xl lg:text-9xl text-center">{rScore}</p>
             </div>
         </div>
     )
