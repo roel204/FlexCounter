@@ -235,7 +235,7 @@ function CounterPage() {
 
     // Function to switch the active model
     function switchModel() {
-        const models = ["Logic", "KNN", "NN"];
+        const models = ["Logic", "KNN"]; // "NN" is removed because it didn't work.
         const currentIndex = models.indexOf(activeModel);
         const nextIndex = (currentIndex + 1) % models.length;
         setActiveModel(models[nextIndex]);
@@ -258,8 +258,8 @@ function CounterPage() {
             <ScoreComponent lScore={lScore} rScore={rScore} setLScore={setLScore} setRScore={setRScore} />
 
             <div className="w-full lg:w-[854px] flex gap-4">
-                <button className="text-sm lg:text-base bg-blue-500 hover:bg-blue-600 rounded-lg p-2 w-[29%] transition" disabled={disableButton} onClick={switchModel}>Tracking
-                    Model: {activeModel}
+                <button className="text-sm lg:text-base bg-blue-500 hover:bg-blue-600 rounded-lg p-2 w-[29%] transition" disabled={disableButton} onClick={switchModel}>
+                    Mode: {activeModel}
                 </button>
                 <button className="bg-lime-500 hover:bg-lime-600 rounded-lg p-2 w-[70%] transition" disabled={disableButton} ref={enableWebcamButton} onClick={enableCam}>Loading...</button>
             </div>
