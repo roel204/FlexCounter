@@ -111,7 +111,11 @@ function CounterPage() {
                 // Draw landmarkers in canvas
                 canvasCtx.clearRect(0, 0, canvasElement.current.width, canvasElement.current.height);
                 for (const landmark of result.landmarks) {
-                    drawingUtils.drawLandmarks(landmark, { radius: (data) => DrawingUtils.lerp(data.from.z, -0.15, 0.1, 5, 1) });
+                    drawingUtils.drawLandmarks(landmark, {
+                        radius: (data) => DrawingUtils.lerp(data.from.z, -0.15, 0.1, 5, 1),
+                        color: (data) => data.from.visibility < 0.8 ? 'red' : 'green'
+                    });
+
                     drawingUtils.drawConnectors(landmark, PoseLandmarker.POSE_CONNECTIONS);
                 }
                 countScore()
