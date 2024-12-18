@@ -1,84 +1,79 @@
-import {useEffect, useRef, useState} from "react";
+import { useEffect, useRef, useState } from "react";
 
-function VideoCanvas({videoElement, canvasElement}) {
-    const videoHeight = useRef("854px");
-    const videoWidth = useRef("480px");
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 1240);
+function VideoCanvas({ videoElement, canvasElement }) {
+    const [videoSize, setVideoSize] = useState({ width: "854px", height: "480px" });
 
     useEffect(() => {
-        const handleResize = () => {
+        const updateSize = () => {
+            if (!videoElement.current) return;
+
+            const naturalWidth = videoElement.current.videoWidth || 854;
+            const naturalHeight = videoElement.current.videoHeight || 480;
+
             const screenWidth = window.innerWidth;
             const screenHeight = window.innerHeight / 2; // Limit height to half of the screen height
-            const aspectRatio = 16 / 9;
+            const aspectRatio = naturalWidth / naturalHeight;
 
-            let width, height;
-
-            // Calculate width based on the aspect ratio
-            width = Math.min(screenWidth, screenHeight / aspectRatio);
-
-            // Calculate height based on the calculated width
-            height = width * aspectRatio;
-
-            // Set the size of the video and canvas elements
-            videoWidth.current = `${Math.floor(width)}px`;
-            videoHeight.current = `${Math.floor(height)}px`;
-
-            setIsMobile(screenWidth < 1240);
-            console.log(videoWidth.current)
-            console.log(videoHeight.current)
+            // Calculate video size based on screen size and natural dimensions
+            if (screenWidth < 1024) {
+                const width = Math.min(screenWidth, screenHeight * aspectRatio);
+                const height = width / aspectRatio;
+                setVideoSize({
+                    width: `${Math.floor(width)}px`,
+                    height: `${Math.floor(height)}px`,
+                });
+            } else {
+                setVideoSize({
+                    width: `${naturalWidth}px`,
+                    height: `${naturalHeight}px`,
+                });
+            }
         };
 
+        // Update size on metadata load and window resize
+        const handleResize = () => updateSize();
+        if (videoElement.current) {
+            videoElement.current.addEventListener("loadedmetadata", updateSize);
+        }
         window.addEventListener("resize", handleResize);
-        handleResize(); // Invoke on mount
 
-        return () => window.removeEventListener("resize", handleResize);
-    }, []);
+        // Initial size calculation
+        updateSize();
+
+        return () => {
+            if (videoElement.current) {
+                videoElement.current.removeEventListener("loadedmetadata", updateSize);
+            }
+            window.removeEventListener("resize", handleResize);
+        };
+    }, [videoElement]);
 
     return (
         <>
-            {isMobile ? (
-                // Mobile
-                <div className={`bg-black/25 w-[${videoWidth.current}] h-[${videoHeight.current}] rounded-2xl relative`}>
-                    <video
-                        autoPlay
-                        playsInline
-                        id="webcam"
-                        className={`absolute rounded-2xl -scale-x-100`}
-                        width={videoWidth.current}
-                        height={videoHeight.current}
-                        ref={videoElement}
-                    ></video>
-                    <canvas
-                        id="output_canvas"
-                        className={`absolute rounded-2xl -scale-x-100`}
-                        width={videoWidth.current}
-                        height={videoHeight.current}
-                        ref={canvasElement}
-                    ></canvas>
-                </div>
-            ) : (
-                // Desktop
-                <div className={`bg-black/25 aspect-video w-[854px] rounded-2xl relative`}>
-                    <video
-                        autoPlay
-                        playsInline
-                        id="webcam"
-                        className={`absolute aspect-video rounded-2xl -scale-x-100`}
-                        width={"854px"}
-                        height={"480px"}
-                        ref={videoElement}
-                    ></video>
-                    <canvas
-                        id="output_canvas"
-                        className={`absolute aspect-video rounded-2xl -scale-x-100`}
-                        width={"854px"}
-                        height={"480px"}
-                        ref={canvasElement}
-                    ></canvas>
-                </div>
-            )}
+            <div
+                className={`bg-black/25 rounded-2xl relative`}
+                style={{ width: videoSize.width, height: videoSize.height }}
+            >
+                <video
+                    autoPlay
+                    playsInline
+                    id="webcam"
+                    className={`absolute rounded-2xl -scale-x-100`}
+                    style={{
+                        width: videoSize.width,
+                        height: videoSize.height,
+                    }}
+                    ref={videoElement}
+                ></video>
+                <canvas
+                    id="output_canvas"
+                    className={`absolute rounded-2xl -scale-x-100`}
+                    width={parseInt(videoSize.width, 10)}
+                    height={parseInt(videoSize.height, 10)}
+                    ref={canvasElement}
+                ></canvas>
+            </div>
         </>
-
     );
 }
 

@@ -242,7 +242,7 @@ function CounterPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#ff8c00] to-[#ffe312] flex flex-col lg:items-center lg:justify-center gap-4 text-white">
+        <div className="min-h-screen bg-gradient-to-br from-[#ff8c00] to-[#ffe312] flex flex-col items-center justify-center gap-4 text-white">
 
             {/*Dev Buttons*/}
             {/*<button className="bg-purple-400 hover:bg-purple-500 rounded p-2 absolute top-2 left-2" onClick={() => {*/}
