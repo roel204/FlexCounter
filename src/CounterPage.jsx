@@ -109,14 +109,19 @@ function CounterPage() {
             poseLandmarkerRef.current.detectForVideo(videoElement.current, startTimeMs, (result) => {
 
                 // Draw landmarkers in canvas
+                const shownPoints = [12, 14, 16, 20, 11, 13, 15, 19];
                 canvasCtx.clearRect(0, 0, canvasElement.current.width, canvasElement.current.height);
                 for (const landmark of result.landmarks) {
-                    drawingUtils.drawLandmarks(landmark, {
-                        radius: (data) => DrawingUtils.lerp(data.from.z, -0.15, 0.1, 5, 1),
-                        color: (data) => data.from.visibility < 0.8 ? 'red' : 'green'
-                    });
+                
+                    const filteredConnections = PoseLandmarker.POSE_CONNECTIONS.filter(
+                        ({ start, end }) => shownPoints.includes(start) && shownPoints.includes(end)
+                    );
+                    drawingUtils.drawConnectors(landmark, filteredConnections);
 
-                    drawingUtils.drawConnectors(landmark, PoseLandmarker.POSE_CONNECTIONS);
+                    const filteredLandmarks = shownPoints.map(index => landmark[index]).filter(Boolean);
+                    drawingUtils.drawLandmarks(filteredLandmarks, {
+                        color: (data) => data.from.visibility < 0.8 ? 'red' : 'lime'
+                    });
                 }
                 countScore()
             });
