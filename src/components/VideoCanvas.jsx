@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 function VideoCanvas({ videoElement, canvasElement }) {
-    const [videoSize, setVideoSize] = useState({ width: "854px", height: "480px" });
+    const [videoSize, setVideoSize] = useState({ width: "256px", height: "144px" });
 
     useEffect(() => {
         const updateSize = () => {

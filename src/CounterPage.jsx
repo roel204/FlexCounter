@@ -1,12 +1,12 @@
-import {useEffect, useRef, useState} from 'react';
-import {DrawingUtils, FilesetResolver, PoseLandmarker,} from '@mediapipe/tasks-vision'
+import { useEffect, useRef, useState } from 'react';
+import { DrawingUtils, FilesetResolver, PoseLandmarker, } from '@mediapipe/tasks-vision'
 import ScoreComponent from "./components/ScoreComponent.jsx";
 import VideoCanvas from "./components/VideoCanvas.jsx";
 // import {saveNN, trainNN} from "./jsFiles/trainNN.js";
-import {useNN} from "./jsFiles/useNN.js";
+import { useNN } from "./jsFiles/useNN.js";
 // import {getDataPoints} from "./jsFiles/getDataPoints.js";
 // import {calcAccuracy} from "./jsFiles/calcAccuracy.js";
-import {useKNN} from "./jsFiles/KNN.js";
+import { useKNN } from "./jsFiles/KNN.js";
 
 function CounterPage() {
     const videoElement = useRef(null)
@@ -87,7 +87,7 @@ function CounterPage() {
         }
 
         // Activate the webcam stream
-        navigator.mediaDevices.getUserMedia({video: true}).then((stream) => {
+        navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
 
             // Set the userMedia as the src of the video element & activate predictWebcam once loaded
             videoElement.current.srcObject = stream;
@@ -111,7 +111,7 @@ function CounterPage() {
                 // Draw landmarkers in canvas
                 canvasCtx.clearRect(0, 0, canvasElement.current.width, canvasElement.current.height);
                 for (const landmark of result.landmarks) {
-                    drawingUtils.drawLandmarks(landmark, {radius: (data) => DrawingUtils.lerp(data.from.z, -0.15, 0.1, 5, 1)});
+                    drawingUtils.drawLandmarks(landmark, { radius: (data) => DrawingUtils.lerp(data.from.z, -0.15, 0.1, 5, 1) });
                     drawingUtils.drawConnectors(landmark, PoseLandmarker.POSE_CONNECTIONS);
                 }
                 countScore()
@@ -129,7 +129,7 @@ function CounterPage() {
         let landmarks = poseLandmarkerRef.current.landmarks[0]
 
         // Code to track and count LEFT arm movement
-        if (landmarks && landmarks[11].visibility > 0.9 && landmarks[13].visibility > 0.9 && landmarks[19].visibility > 0.9) {
+        if (landmarks && landmarks[11].visibility > 0.8 && landmarks[13].visibility > 0.8 && landmarks[19].visibility > 0.8) {
             let lShoulderY = landmarks[11].y
             let lElbowY = landmarks[13].y
             let lHandY = landmarks[19].y
@@ -181,7 +181,7 @@ function CounterPage() {
         }
 
         // Code to track and count RIGHT arm movement
-        if (landmarks && landmarks[12].visibility > 0.9 && landmarks[14].visibility > 0.9 && landmarks[20].visibility > 0.9) {
+        if (landmarks && landmarks[12].visibility > 0.8 && landmarks[14].visibility > 0.8 && landmarks[20].visibility > 0.8) {
             let rShoulderY = landmarks[12].y
             let rElbowY = landmarks[14].y
             let rHandY = landmarks[20].y
@@ -255,15 +255,16 @@ function CounterPage() {
 
             <h1 className="text-5xl lg:text-7xl font-bold text-center">FLEX COUNTER</h1>
 
-            <ScoreComponent lScore={lScore} rScore={rScore} setLScore={setLScore} setRScore={setRScore}/>
+            <ScoreComponent lScore={lScore} rScore={rScore} setLScore={setLScore} setRScore={setRScore} />
 
             <div className="w-full lg:w-[854px] flex gap-4">
-                <button className="text-sm lg:text-base bg-blue-500 hover:bg-blue-600 rounded-lg p-4 lg:p-2 w-[29%] transition" disabled={disableButton} onClick={switchModel}>Tracking
-                    Model: {activeModel}</button>
+                <button className="text-sm lg:text-base bg-blue-500 hover:bg-blue-600 rounded-lg p-2 w-[29%] transition" disabled={disableButton} onClick={switchModel}>Tracking
+                    Model: {activeModel}
+                </button>
                 <button className="bg-lime-500 hover:bg-lime-600 rounded-lg p-2 w-[70%] transition" disabled={disableButton} ref={enableWebcamButton} onClick={enableCam}>Loading...</button>
             </div>
 
-            <VideoCanvas videoElement={videoElement} canvasElement={canvasElement}/>
+            <VideoCanvas videoElement={videoElement} canvasElement={canvasElement} />
         </div>
     )
 
