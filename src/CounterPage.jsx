@@ -2,29 +2,29 @@ import { useEffect, useRef, useState } from 'react';
 import { DrawingUtils, FilesetResolver, PoseLandmarker, } from '@mediapipe/tasks-vision'
 import ScoreComponent from "./components/ScoreComponent.jsx";
 import VideoCanvas from "./components/VideoCanvas.jsx";
-// import {saveNN, trainNN} from "./jsFiles/trainNN.js";
 import { useNN } from "./jsFiles/useNN.js";
+import { useKNN } from "./jsFiles/KNN.js";
+// import {saveNN, trainNN} from "./jsFiles/trainNN.js";
 // import {getDataPoints} from "./jsFiles/getDataPoints.js";
 // import {calcAccuracy} from "./jsFiles/calcAccuracy.js";
-import { useKNN } from "./jsFiles/KNN.js";
 
 function CounterPage() {
     const videoElement = useRef(null)
     const canvasElement = useRef(null)
     const enableWebcamButton = useRef(null)
+    const poseLandmarkerRef = useRef(null)
     let canvasCtx = useRef(null)
     let drawingUtils = useRef(null)
-    const poseLandmarkerRef = useRef(null)
 
-    let predictionsRunning = false;
     let lastVideoTime = -1;
+    let predictionsRunning = useRef(false)
 
     let lDown = false
     let rDown = false
     const [lScore, setLScore] = useState(0)
     const [rScore, setRScore] = useState(0)
 
-    const [disableButton, setDisableButton] = useState(true)
+    const [loading, setLoading] = useState(true)
     const [activeModel, setActiveModel] = useState("Logic")
     const modelRef = useRef(activeModel)
 
@@ -63,7 +63,7 @@ function CounterPage() {
                 min_pose_presence_confidence: 0.8,
                 min_tracking_confidence: 0.8
             })
-            setDisableButton(false)
+            setLoading(false)
             enableWebcamButton.current.innerText = "Enable Webcam"
         };
 
@@ -72,18 +72,21 @@ function CounterPage() {
 
     // Enable the live webcam view and start detection or toggle predictions
     const enableCam = () => {
-
         if (!poseLandmarkerRef.current) {
             window.alert("Wait! poseLandmaker not loaded yet.");
             return;
         }
 
-        if (predictionsRunning === true) {
-            predictionsRunning = false;
-            enableWebcamButton.current.innerText = "Enable Predictions";
+        if (predictionsRunning.current) {
+            predictionsRunning.current = false;
+            enableWebcamButton.current.innerText = "Enable Counting";
         } else {
-            predictionsRunning = true;
-            enableWebcamButton.current.innerText = "Disable Predictions";
+            predictionsRunning.current = true;
+            enableWebcamButton.current.innerText = "Pause Counting";
+        }
+
+        if (videoElement.current.srcObject != null) {
+            return;
         }
 
         // Activate the webcam stream
@@ -112,7 +115,7 @@ function CounterPage() {
                 const shownPoints = [12, 14, 16, 20, 11, 13, 15, 19];
                 canvasCtx.clearRect(0, 0, canvasElement.current.width, canvasElement.current.height);
                 for (const landmark of result.landmarks) {
-                
+
                     const filteredConnections = PoseLandmarker.POSE_CONNECTIONS.filter(
                         ({ start, end }) => shownPoints.includes(start) && shownPoints.includes(end)
                     );
@@ -123,15 +126,15 @@ function CounterPage() {
                         color: (data) => data.from.visibility < 0.8 ? 'red' : 'lime'
                     });
                 }
-                countScore()
+                console.log(predictionsRunning.current);
+
+                if (predictionsRunning.current) {
+                    countScore();
+                }
             });
         }
 
-        // Call this function again to keep predicting when the browser is ready
-        if (predictionsRunning === true) {
-            // Activate predictWebcam every frame
-            window.requestAnimationFrame(predictWebcam);
-        }
+        window.requestAnimationFrame(predictWebcam);
     }
 
     const countScore = async () => {
@@ -267,10 +270,14 @@ function CounterPage() {
             <ScoreComponent lScore={lScore} rScore={rScore} setLScore={setLScore} setRScore={setRScore} />
 
             <div className="w-full lg:w-[854px] flex gap-4">
-                <button className="text-sm lg:text-base bg-blue-500 hover:bg-blue-600 rounded-lg p-2 w-[29%] transition" disabled={disableButton} onClick={switchModel}>
+                <button className="text-sm lg:text-base bg-blue-500 hover:bg-blue-600 rounded-lg p-2 w-[29%] transition"
+                    disabled={loading} onClick={switchModel}>
                     Mode: {activeModel}
                 </button>
-                <button className="bg-lime-500 hover:bg-lime-600 rounded-lg p-2 w-[70%] transition" disabled={disableButton} ref={enableWebcamButton} onClick={enableCam}>Loading...</button>
+                <button className="bg-lime-500 hover:bg-lime-600 rounded-lg p-2 w-[70%] transition"
+                    disabled={loading} ref={enableWebcamButton} onClick={enableCam}>
+                    Loading...
+                </button>
             </div>
 
             <VideoCanvas videoElement={videoElement} canvasElement={canvasElement} />
