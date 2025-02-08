@@ -17,7 +17,6 @@ function CounterPage() {
     let drawingUtils = useRef(null)
 
     let lastVideoTime = -1;
-    let predictionsRunning = useRef(false)
 
     let lDown = false
     let rDown = false
@@ -25,6 +24,10 @@ function CounterPage() {
     const [rScore, setRScore] = useState(0)
 
     const [loading, setLoading] = useState(true)
+
+    const [countingRunning, setCountingRunning] = useState(false);
+    const countingRunningRef = useRef(countingRunning);
+
     const [activeModel, setActiveModel] = useState("Logic")
     const modelRef = useRef(activeModel)
 
@@ -77,14 +80,13 @@ function CounterPage() {
             return;
         }
 
-        if (predictionsRunning.current) {
-            predictionsRunning.current = false;
-            enableWebcamButton.current.innerText = "Enable Counting";
-        } else {
-            predictionsRunning.current = true;
-            enableWebcamButton.current.innerText = "Pause Counting";
-        }
+        setCountingRunning(prevState => {
+            countingRunningRef.current = !prevState;
+            return !prevState;
+        });
+        enableWebcamButton.current.innerText = countingRunning ? "Enable Counting" : "Pause Counting";
 
+        // Prevent multiple webcam activations
         if (videoElement.current.srcObject != null) {
             return;
         }
@@ -126,12 +128,12 @@ function CounterPage() {
                         color: (data) => data.from.visibility < 0.8 ? 'red' : 'lime'
                     });
                 }
-                console.log(predictionsRunning.current);
-
-                if (predictionsRunning.current) {
-                    countScore();
-                }
             });
+
+            console.log(countingRunningRef.current);
+            if (countingRunningRef.current) {
+                countScore();
+            }
         }
 
         window.requestAnimationFrame(predictWebcam);
@@ -280,7 +282,7 @@ function CounterPage() {
                 </button>
             </div>
 
-            <VideoCanvas videoElement={videoElement} canvasElement={canvasElement} />
+            <VideoCanvas videoElement={videoElement} canvasElement={canvasElement} countingRunning={countingRunning} />
         </div>
     )
 
