@@ -40,23 +40,29 @@ function ScoreComponent({ lScore, rScore, setRScore, setLScore }) {
     }
 
     const resetScore = () => {
-        setLScore(0)
-        setRScore(0)
-    }
+        if (window.confirm("Are you sure you want to reset both current scores?")) {
+            setLScore(0);
+            setRScore(0);
+        }
+    };
 
     const resetTotal = () => {
-        setLTotal(0)
-        setRTotal(0)
-        localStorage.setItem("lTotal", 0)
-        localStorage.setItem("rTotal", 0)
-    }
+        if (window.confirm("Are you sure you want to reset your total score?")) {
+            setLTotal(0);
+            setRTotal(0);
+            localStorage.setItem("lTotal", 0);
+            localStorage.setItem("rTotal", 0);
+        }
+    };
 
     const resetRecord = () => {
-        setLRecord(0)
-        setRRecord(0)
-        localStorage.setItem("lRecord", 0)
-        localStorage.setItem("rRecord", 0)
-    }
+        if (window.confirm("Are you sure you want to reset your personal record?")) {
+            setLRecord(0);
+            setRRecord(0);
+            localStorage.setItem("lRecord", 0);
+            localStorage.setItem("rRecord", 0);
+        }
+    };
 
     return (
         <div className="flex flex-row gap-4 w-full lg:w-[854px] justify-between">
