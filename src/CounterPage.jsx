@@ -38,12 +38,12 @@ function CounterPage() {
 
     // Setup Camera and PoseLandmarker
     useEffect(() => {
-        // Setup user camera
         const startApp = () => {
             const hasGetUserMedia = () => {
                 let _a;
                 return !!((_a = navigator.mediaDevices) === null || _a === void 0 ? void 0 : _a.getUserMedia);
             };
+
             if (hasGetUserMedia()) {
                 createPoseLandmarker();
             } else {
@@ -75,21 +75,17 @@ function CounterPage() {
 
     // Enable the live webcam view and start detection or toggle predictions
     const enableCam = () => {
-        if (!poseLandmarkerRef.current) {
-            window.alert("Wait! poseLandmaker not loaded yet.");
-            return;
-        }
 
+        // Toggle counting state
         setCountingRunning(prevState => {
             countingRunningRef.current = !prevState;
             return !prevState;
         });
         enableWebcamButton.current.innerText = countingRunning ? "Enable Counting" : "Pause Counting";
 
-        // Prevent multiple webcam activations
-        if (videoElement.current.srcObject != null) {
-            return;
-        }
+        // Prevent starting early & multiple webcam activations
+        if (!poseLandmarkerRef.current) return;
+        if (videoElement.current.srcObject != null) return;
 
         // Activate the webcam stream
         navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
@@ -104,6 +100,7 @@ function CounterPage() {
         });
     }
 
+    // Continuously capture images from the webcam and run the Pose Landmarker model
     const predictWebcam = async () => {
         let startTimeMs = performance.now();
         canvasCtx = canvasElement.current.getContext("2d");
@@ -131,9 +128,7 @@ function CounterPage() {
             });
 
             console.log(countingRunningRef.current);
-            if (countingRunningRef.current) {
-                countScore();
-            }
+            if (countingRunningRef.current) countScore();
         }
 
         window.requestAnimationFrame(predictWebcam);
