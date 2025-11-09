@@ -1,6 +1,7 @@
 # Flex Counter
 
-**Flex Counter** is an AI-powered application that helps you track your bicep curls using your webcam.
+**Flex Counter** is a web application that helps you track your bicep curls using your webcam.
+It uses Google's MediaPipe Pose landmark detection AI to detect your pose and count your curls.
 
 
 ## Installation instructions:
