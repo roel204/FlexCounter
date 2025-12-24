@@ -19,8 +19,8 @@ function CounterPage() {
     let lastVideoTime = -1;
 
     const minVisibility = 0.9
-    let lDown = false
-    let rDown = false
+    const lDownRef = useRef(false);
+    const rDownRef = useRef(false);
     const [lScore, setLScore] = useState(0)
     const [rScore, setRScore] = useState(0)
 
@@ -135,111 +135,60 @@ function CounterPage() {
         window.requestAnimationFrame(predictWebcam);
     }
 
-    const countScore = async () => {
-        let landmarks = poseLandmarkerRef.current.landmarks[0]
+    function getArmY(shoulder, elbow, hand) {
+        const landmarks = poseLandmarkerRef.current.landmarks[0];
 
-        // Code to track and count LEFT arm movement
-        if (landmarks && landmarks[11].visibility > minVisibility && landmarks[13].visibility > minVisibility && landmarks[19].visibility > minVisibility) {
-            let lShoulderY = landmarks[11].y
-            let lElbowY = landmarks[13].y
-            let lHandY = landmarks[19].y
-
-            if (modelRef.current === "KNN") {
-                let prediction = await useKNN(lShoulderY, lElbowY, lHandY)
-                // console.log(`KNN Left is ${prediction}`)
-
-                if (prediction === "up") {
-                    if (lDown) {
-                        setLScore((lScore) => lScore + 1)
-                        lDown = false
-                    }
-                }
-
-                if (prediction === "down") {
-                    lDown = true
-                }
-
-            } else if (modelRef.current === "NN") {
-                let prediction = await useNN(lShoulderY, lElbowY, lHandY)
-                // console.log(`NN Left is ${prediction}`)
-
-                if (prediction === "up") {
-                    if (lDown) {
-                        setLScore((lScore) => lScore + 1)
-                        lDown = false
-                    }
-                }
-
-                if (prediction === "down") {
-                    lDown = true
-                }
-
-            } else {
-                if (lHandY < lShoulderY) {
-                    if (lDown) {
-                        // console.log("Logic Left is up")
-                        setLScore((lScore) => lScore + 1)
-                        lDown = false
-                    }
-                }
-
-                if (lHandY > lElbowY) {
-                    // console.log("Logic Left is down")
-                    lDown = true
-                }
-            }
+        if (!landmarks || landmarks[shoulder].visibility <= minVisibility || landmarks[elbow].visibility <= minVisibility || landmarks[hand].visibility <= minVisibility) {
+            return null;
         }
 
-        // Code to track and count RIGHT arm movement
-        if (landmarks && landmarks[12].visibility > minVisibility && landmarks[14].visibility > minVisibility && landmarks[20].visibility > minVisibility) {
-            let rShoulderY = landmarks[12].y
-            let rElbowY = landmarks[14].y
-            let rHandY = landmarks[20].y
+        return {
+            shoulderY: landmarks[shoulder].y,
+            elbowY: landmarks[elbow].y,
+            handY: landmarks[hand].y,
+        };
+    }
 
-            if (modelRef.current === "KNN") {
-                let prediction = await useKNN(rShoulderY, rElbowY, rHandY)
-                // console.log(`KNN Right is ${prediction}`)
+    async function getPrediction(model, points) {
+        const { shoulderY, elbowY, handY } = points;
+        if (model === "KNN") {
+            return await useKNN(shoulderY, elbowY, handY);
+        }
 
-                if (prediction === "up") {
-                    if (rDown) {
-                        setRScore((rScore) => rScore + 1)
-                        rDown = false
-                    }
-                }
+        if (model === "NN") {
+            return await useNN(shoulderY, elbowY, handY);
+        }
 
-                if (prediction === "down") {
-                    rDown = true
-                }
+        // Logic fallback
+        if (handY < shoulderY) return "up";
+        if (handY > elbowY) return "down";
+        return null;
+    }
 
-            } else if (modelRef.current === "NN") {
-                let prediction = await useNN(rShoulderY, rElbowY, rHandY)
-                // console.log(`NN Right is ${nnResRight}`)
+    function handleScoreCount(prediction, downRef, setScore) {
+        if (prediction === "up" && downRef.current) {
+            setScore((s) => s + 1);
+            downRef.current = false;
+        }
 
-                if (prediction === "up") {
-                    if (rDown) {
-                        setRScore((rScore) => rScore + 1)
-                        rDown = false
-                    }
-                }
+        if (prediction === "down") {
+            downRef.current = true;
+        }
+    }
 
-                if (prediction === "down") {
-                    rDown = true
-                }
+    const countScore = async () => {
+        // LEFT ARM
+        const leftPosY = getArmY(11, 13, 19);
+        if (leftPosY) {
+            const pred = await getPrediction(modelRef.current, leftPosY);
+            handleScoreCount(pred, lDownRef, setLScore);
+        }
 
-            } else {
-                if (rHandY < rShoulderY) {
-                    if (rDown) {
-                        // console.log("Logic Right is up")
-                        setRScore((rScore) => rScore + 1)
-                        rDown = false
-                    }
-                }
-
-                if (rHandY > rElbowY) {
-                    // console.log("Logic Right is down")
-                    rDown = true
-                }
-            }
+        // RIGHT ARM
+        const rightPosY = getArmY(12, 14, 20);
+        if (rightPosY) {
+            const pred = await getPrediction(modelRef.current, rightPosY);
+            handleScoreCount(pred, rDownRef, setRScore);
         }
     }
 
