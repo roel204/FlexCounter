@@ -9,28 +9,31 @@ import { useKNN } from "./jsFiles/KNN.js";
 // import {calcAccuracy} from "./jsFiles/calcAccuracy.js";
 
 function CounterPage() {
-    const videoElement = useRef(null)
-    const canvasElement = useRef(null)
-    const enableWebcamButton = useRef(null)
-    const poseLandmarkerRef = useRef(null)
-    let canvasCtx = useRef(null)
-    let drawingUtils = useRef(null)
+    const videoElement = useRef(null);
+    const canvasElement = useRef(null);
+    const enableWebcamButton = useRef(null);
+    const poseLandmarkerRef = useRef(null);
+    let canvasCtx = useRef(null);
+    let drawingUtils = useRef(null);
 
     let lastVideoTime = -1;
 
-    const minVisibility = 0.9
-    const lDownRef = useRef(false);
-    const rDownRef = useRef(false);
-    const [lScore, setLScore] = useState(0)
-    const [rScore, setRScore] = useState(0)
+    const minVisibility = 0.9;
+    const minFrameCount = 5;
+    const lDownRef = useRef(0);
+    const rDownRef = useRef(0);
+    const lUpRef = useRef(0);
+    const rUpRef = useRef(0);
+    const [lScore, setLScore] = useState(0);
+    const [rScore, setRScore] = useState(0);
 
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(true);
 
     const [countingRunning, setCountingRunning] = useState(false);
     const countingRunningRef = useRef(countingRunning);
 
-    const [activeModel, setActiveModel] = useState("Logic")
-    const modelRef = useRef(activeModel)
+    const [activeModel, setActiveModel] = useState("Logic");
+    const modelRef = useRef(activeModel);
 
     // Set the modelRef everytime the activeModel changes
     useEffect(() => {
@@ -165,14 +168,20 @@ function CounterPage() {
         return null;
     }
 
-    function handleScoreCount(prediction, downRef, setScore) {
-        if (prediction === "up" && downRef.current) {
-            setScore((s) => s + 1);
-            downRef.current = false;
+    function handleScoreCount(prediction, downRef, upRef, setScore) {
+        if (prediction === "up") {
+            upRef.current = upRef.current + 1;
         }
 
         if (prediction === "down") {
-            downRef.current = true;
+            downRef.current = downRef.current + 1;
+            upRef.current = 0;
+        }
+
+        if (upRef.current >= minFrameCount && downRef.current >= minFrameCount) {
+            setScore((s) => s + 1);
+            downRef.current = 0;
+            upRef.current = 0;
         }
     }
 
@@ -181,14 +190,14 @@ function CounterPage() {
         const leftPosY = getArmY(11, 13, 19);
         if (leftPosY) {
             const pred = await getPrediction(modelRef.current, leftPosY);
-            handleScoreCount(pred, lDownRef, setLScore);
+            handleScoreCount(pred, lDownRef, lUpRef, setLScore);
         }
 
         // RIGHT ARM
         const rightPosY = getArmY(12, 14, 20);
         if (rightPosY) {
             const pred = await getPrediction(modelRef.current, rightPosY);
-            handleScoreCount(pred, rDownRef, setRScore);
+            handleScoreCount(pred, rDownRef, rUpRef, setRScore);
         }
     }
 
