@@ -74,31 +74,30 @@ function CounterPage() {
     }, []);
 
     // Enable the live webcam view and start detection or toggle predictions
-    const enableCam = () => {
-        if (!poseLandmarkerRef.current) return;
-
-        // Toggle counting state
-        setCountingRunning(prevState => {
-            countingRunningRef.current = !prevState;
-            return !prevState;
-        });
-        enableWebcamButton.current.innerText = countingRunning ? "Enable Counting" : "Pause Counting";
-
-        // Activate the webcam stream
-        if (videoElement.current.srcObject != null) return;
+    const enableWebcam = () => {
+        toggleCounting();
+        if (videoElement.current.srcObject) return;
         setLoading(true);
-        navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
 
-            // Set the userMedia as the src of the video element & activate predictWebcam once loaded
+        navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
             videoElement.current.srcObject = stream;
             videoElement.current.addEventListener("loadeddata", predictWebcam);
 
         }).catch((error) => {
             console.error("Error accessing webcam:", error);
-            window.alert("Error accessing webcam.")
+            window.alert("Error accessing webcam.");
+        }).finally(() => {
+            setLoading(false);
         });
-        setLoading(false);
     }
+
+    const toggleCounting = () => {
+        setCountingRunning((prevState) => {
+            countingRunningRef.current = !prevState;
+            enableWebcamButton.current.innerText = countingRunningRef.current ? "Pause Counting" : "Enable Counting";
+            return !prevState;
+        });
+    };
 
     // Continuously capture images from the webcam and run the Pose Landmarker model
     const predictWebcam = async () => {
@@ -272,7 +271,7 @@ function CounterPage() {
                     Mode: {activeModel}
                 </button>
                 <button className="bg-lime-500 hover:bg-lime-600 rounded-lg p-2 w-[70%] transition"
-                    disabled={loading} ref={enableWebcamButton} onClick={enableCam}>
+                    disabled={loading} ref={enableWebcamButton} onClick={enableWebcam}>
                     Loading...
                 </button>
             </div>
