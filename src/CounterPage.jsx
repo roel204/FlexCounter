@@ -18,6 +18,7 @@ function CounterPage() {
 
     let lastVideoTime = -1;
 
+    const minVisibility = 0.9
     let lDown = false
     let rDown = false
     const [lScore, setLScore] = useState(0)
@@ -62,9 +63,9 @@ function CounterPage() {
                 },
                 runningMode: "VIDEO",
                 numPoses: 1,
-                min_pose_detection_confidence: 0.8,
-                min_pose_presence_confidence: 0.8,
-                min_tracking_confidence: 0.8
+                min_pose_detection_confidence: 0.9,
+                min_pose_presence_confidence: 0.6,
+                min_tracking_confidence: 0.6
             })
             setLoading(false)
             enableWebcamButton.current.innerText = "Enable Webcam"
@@ -109,9 +110,10 @@ function CounterPage() {
             lastVideoTime = videoElement.current.currentTime;
             poseLandmarkerRef.current.detectForVideo(videoElement.current, startTimeMs, (result) => {
 
-                // Draw landmarkers in canvas
-                const shownPoints = [12, 14, 16, 20, 11, 13, 15, 19];
                 canvasCtx.clearRect(0, 0, canvasElement.current.width, canvasElement.current.height);
+                if (!result.landmarks || result.landmarks.length === 0) return; // No pose detected
+
+                const shownPoints = [12, 14, 16, 20, 11, 13, 15, 19];
                 for (const landmark of result.landmarks) {
 
                     const filteredConnections = PoseLandmarker.POSE_CONNECTIONS.filter(
@@ -121,13 +123,13 @@ function CounterPage() {
 
                     const filteredLandmarks = shownPoints.map(index => landmark[index]).filter(Boolean);
                     drawingUtils.drawLandmarks(filteredLandmarks, {
-                        color: (data) => data.from.visibility < 0.8 ? 'red' : 'lime'
+                        color: (data) => data.from.visibility < minVisibility ? 'red' : 'lime'
                     });
                 }
-            });
 
-            // console.log(countingRunningRef.current);
-            if (countingRunningRef.current) countScore();
+                // console.log(countingRunningRef.current);
+                if (countingRunningRef.current) countScore();
+            });
         }
 
         window.requestAnimationFrame(predictWebcam);
@@ -137,7 +139,7 @@ function CounterPage() {
         let landmarks = poseLandmarkerRef.current.landmarks[0]
 
         // Code to track and count LEFT arm movement
-        if (landmarks && landmarks[11].visibility > 0.8 && landmarks[13].visibility > 0.8 && landmarks[19].visibility > 0.8) {
+        if (landmarks && landmarks[11].visibility > minVisibility && landmarks[13].visibility > minVisibility && landmarks[19].visibility > minVisibility) {
             let lShoulderY = landmarks[11].y
             let lElbowY = landmarks[13].y
             let lHandY = landmarks[19].y
@@ -189,7 +191,7 @@ function CounterPage() {
         }
 
         // Code to track and count RIGHT arm movement
-        if (landmarks && landmarks[12].visibility > 0.8 && landmarks[14].visibility > 0.8 && landmarks[20].visibility > 0.8) {
+        if (landmarks && landmarks[12].visibility > minVisibility && landmarks[14].visibility > minVisibility && landmarks[20].visibility > minVisibility) {
             let rShoulderY = landmarks[12].y
             let rElbowY = landmarks[14].y
             let rHandY = landmarks[20].y
