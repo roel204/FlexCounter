@@ -75,6 +75,9 @@ function CounterPage() {
 
     // Enable the live webcam view and start detection or toggle predictions
     const enableCam = () => {
+        // Prevent starting early & multiple webcam activations
+        if (!poseLandmarkerRef.current) return;
+        if (videoElement.current.srcObject != null) return;
 
         // Toggle counting state
         setCountingRunning(prevState => {
@@ -82,10 +85,6 @@ function CounterPage() {
             return !prevState;
         });
         enableWebcamButton.current.innerText = countingRunning ? "Enable Counting" : "Pause Counting";
-
-        // Prevent starting early & multiple webcam activations
-        if (!poseLandmarkerRef.current) return;
-        if (videoElement.current.srcObject != null) return;
 
         // Activate the webcam stream
         navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
@@ -127,7 +126,7 @@ function CounterPage() {
                 }
             });
 
-            console.log(countingRunningRef.current);
+            // console.log(countingRunningRef.current);
             if (countingRunningRef.current) countScore();
         }
 

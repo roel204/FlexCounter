@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 function VideoCanvas({ videoElement, canvasElement, countingRunning }) {
-    const [videoSize, setVideoSize] = useState({ width: "256px", height: "144px" });
+    const [videoSize, setVideoSize] = useState({ width: "854px", height: "480px" });
 
     useEffect(() => {
         const updateSize = () => {
@@ -9,43 +9,34 @@ function VideoCanvas({ videoElement, canvasElement, countingRunning }) {
 
             const naturalWidth = videoElement.current.videoWidth || 854;
             const naturalHeight = videoElement.current.videoHeight || 480;
-
             const screenWidth = window.innerWidth;
             const screenHeight = window.innerHeight / 2; // Limit height to half of the screen height
             const aspectRatio = naturalWidth / naturalHeight;
 
             // Calculate video size based on screen size and natural dimensions
-            if (screenWidth < 1024) {
-                const width = Math.min(screenWidth, screenHeight * aspectRatio);
-                const height = width / aspectRatio;
-                setVideoSize({
-                    width: `${Math.floor(width)}px`,
-                    height: `${Math.floor(height)}px`,
-                });
-            } else {
-                setVideoSize({
-                    width: `${naturalWidth}px`,
-                    height: `${naturalHeight}px`,
-                });
-            }
+            let width = Math.min(screenWidth, screenHeight * aspectRatio);
+            let height = width / aspectRatio;
+            width = Math.min(width, 854);
+            height = Math.min(height, 480);
+
+            setVideoSize({
+                width: `${Math.floor(width)}px`,
+                height: `${Math.floor(height)}px`,
+            });
+            console.log("Size set to: ", Math.floor(width), Math.floor(height));
         };
-
-        // Update size on metadata load and window resize
-        const handleResize = () => updateSize();
-        if (videoElement.current) {
-            videoElement.current.addEventListener("loadedmetadata", updateSize);
-        }
-        window.addEventListener("resize", handleResize);
-
-        // Initial size calculation
         updateSize();
 
+        // Add event listeners
+        if (videoElement.current) videoElement.current.addEventListener("loadedmetadata", updateSize);
+        window.addEventListener("resize", updateSize);
+
+        // Cleanup event listeners on unmount
         return () => {
-            if (videoElement.current) {
-                videoElement.current.removeEventListener("loadedmetadata", updateSize);
-            }
-            window.removeEventListener("resize", handleResize);
+            if (videoElement.current) videoElement.current.removeEventListener("loadedmetadata", updateSize);
+            window.removeEventListener("resize", updateSize);
         };
+
     }, [videoElement]);
 
     return (
