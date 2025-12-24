@@ -1,29 +1,25 @@
 import { useEffect, useState } from "react";
 
 function VideoCanvas({ videoElement, canvasElement, countingRunning }) {
-    const [videoSize, setVideoSize] = useState({ width: "854px", height: "480px" });
+    const [videoSize, setVideoSize] = useState({ width: "256px", height: "144px" });
 
     useEffect(() => {
         const updateSize = () => {
-            if (!videoElement.current) return;
-
-            const naturalWidth = videoElement.current.videoWidth || 854;
-            const naturalHeight = videoElement.current.videoHeight || 480;
+            const videoWidth = videoElement.current.videoWidth || 256;
+            const videoHeight = videoElement.current.videoHeight || 144;
+            const videoRatio = videoWidth / videoHeight;
             const screenWidth = window.innerWidth;
             const screenHeight = window.innerHeight / 2; // Limit height to half of the screen height
-            const aspectRatio = naturalWidth / naturalHeight;
 
             // Calculate video size based on screen size and natural dimensions
-            let width = Math.min(screenWidth, screenHeight * aspectRatio);
-            let height = width / aspectRatio;
-            width = Math.min(width, 854);
-            height = Math.min(height, 480);
+            const width = Math.min(854, screenWidth, screenHeight * videoRatio);
+            const height = Math.min(480, width / videoRatio);
 
             setVideoSize({
                 width: `${Math.floor(width)}px`,
                 height: `${Math.floor(height)}px`,
             });
-            console.log("Size set to: ", Math.floor(width), Math.floor(height));
+            console.log("Size updated to: ", Math.floor(width), Math.floor(height));
         };
         updateSize();
 
