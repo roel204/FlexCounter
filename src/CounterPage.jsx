@@ -19,7 +19,8 @@ function CounterPage() {
     let lastVideoTime = -1;
 
     const minVisibility = 0.9;
-    const minFrameCount = 5;
+    const minFrameCount = 3;
+    // TODO: adjust minFrameCount based on framerate?
     const lDownRef = useRef(0);
     const rDownRef = useRef(0);
     const lUpRef = useRef(0);
