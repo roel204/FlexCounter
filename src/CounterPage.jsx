@@ -86,6 +86,7 @@ function CounterPage() {
 
         // Activate the webcam stream
         if (videoElement.current.srcObject != null) return;
+        setLoading(true);
         navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
 
             // Set the userMedia as the src of the video element & activate predictWebcam once loaded
@@ -96,6 +97,7 @@ function CounterPage() {
             console.error("Error accessing webcam:", error);
             window.alert("Error accessing webcam.")
         });
+        setLoading(false);
     }
 
     // Continuously capture images from the webcam and run the Pose Landmarker model
