@@ -75,9 +75,7 @@ function CounterPage() {
 
     // Enable the live webcam view and start detection or toggle predictions
     const enableCam = () => {
-        // Prevent starting early & multiple webcam activations
         if (!poseLandmarkerRef.current) return;
-        if (videoElement.current.srcObject != null) return;
 
         // Toggle counting state
         setCountingRunning(prevState => {
@@ -87,6 +85,7 @@ function CounterPage() {
         enableWebcamButton.current.innerText = countingRunning ? "Enable Counting" : "Pause Counting";
 
         // Activate the webcam stream
+        if (videoElement.current.srcObject != null) return;
         navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
 
             // Set the userMedia as the src of the video element & activate predictWebcam once loaded
